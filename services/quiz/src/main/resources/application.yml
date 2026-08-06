@@ -1,0 +1,14 @@
+spring:
+    application:
+        name: qoap-quiz-service
+    datasource:
+        driver-class-name: org.postgresql.Driver
+        url: jdbc:postgresql://localhost:5432/qoap_quiz
+        username: admin
+        password: admin
+    jpa:
+        hibernate:
+            ddl-auto: update
+    sql:
+        init:
+            mode: always
