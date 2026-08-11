@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.qoap.quiz.enums.QuizDifficulty;
 
 import jakarta.persistence.CascadeType;
@@ -50,6 +51,7 @@ public class QuizSettings {
     @Column(nullable = false, length = 5)
     private Integer maxAttempts;
 
+    @JsonIgnore
     @OneToOne(cascade = { CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH })
     private Quiz quiz;
 

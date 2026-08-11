@@ -3,6 +3,7 @@ package com.qoap.quiz.models;
 import java.time.LocalDateTime;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.qoap.quiz.enums.QuizDifficulty;
 
 import jakarta.persistence.CascadeType;
@@ -33,6 +34,7 @@ public class Question {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "quiz_id")
     private Quiz quiz;

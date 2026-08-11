@@ -2,6 +2,7 @@ package com.qoap.quiz.models;
 
 import java.time.LocalDateTime;
 import java.util.Set;
+import java.util.UUID;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -37,8 +38,8 @@ import lombok.Setter;
 public class Quiz {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @Column(length = 150, nullable = false)
     private String title;

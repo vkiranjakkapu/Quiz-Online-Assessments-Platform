@@ -59,12 +59,13 @@ public class Attempt {
     @OneToMany(mappedBy = "attempt", cascade = CascadeType.ALL)
     private Set<Answer> answers;
 
-    private Duration timetaken;
+    private Duration timeSpent;
 
     @Enumerated(EnumType.STRING)
     @Builder.Default
     private CompletionStatus status = CompletionStatus.IN_PROGRESS;
 
-    private LocalDateTime attemptTime;
+    @Builder.Default
+    private LocalDateTime attemptTime = LocalDateTime.now();
 
 }

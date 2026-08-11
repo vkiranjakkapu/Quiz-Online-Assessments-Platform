@@ -1,10 +1,8 @@
-{
-  "properties": [
-    {
-      "name": "spring.jpa.properties.hibernate.format_sql",
-      "type": "java.lang.Boolean",
-      "description": "show SQL in console",
-      "defaultValue": false
-    }
-  ]
-}
+{"properties": [
+  {
+    "name": "spring.jpa.properties.hibernate.format_sql",
+    "type": "java.lang.Boolean",
+    "description": "show SQL in console",
+    "defaultValue": false
+  }
+]}
