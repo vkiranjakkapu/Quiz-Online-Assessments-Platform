@@ -1,0 +1,2 @@
+com.labmantix.platform.security.config.SecurityInfraAutoConfiguration
+com.labmantix.platform.security.config.SecurityWebAutoConfiguration
