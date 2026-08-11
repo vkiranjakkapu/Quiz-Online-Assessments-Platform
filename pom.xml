@@ -12,7 +12,7 @@
     </parent>
 
     <name>Quiz and Online Assessments Portal</name>
-    
+
     <groupId>com.qoap</groupId>
     <artifactId>qoap</artifactId>
     <version>0.1.0-SNAPSHOT</version>
@@ -20,21 +20,97 @@
 
     <properties>
         <java.version>25</java.version>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <spring-cloud.version>2025.1.2</spring-cloud.version>
+        <platform.version>1.0.0-SNAPSHOT</platform.version>
+        <springdoc-swagger.version>2.8.9</springdoc-swagger.version>
+        <jjwt.version>0.12.7</jjwt.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <modules>
+        <module>cloud</module>
+        <module>platform</module>
         <module>services</module>
     </modules>
+
+    <dependencyManagement>
+        <dependencies>
+
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>com.labmantix.platform</groupId>
+                <artifactId>logging</artifactId>
+                <version>${platform.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.labmantix.platform</groupId>
+                <artifactId>restclient</artifactId>
+                <version>${platform.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.labmantix.platform</groupId>
+                <artifactId>security</artifactId>
+                <version>${platform.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.labmantix.platform</groupId>
+                <artifactId>web</artifactId>
+                <version>${platform.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+                <version>${springdoc-swagger.version}</version>
+            </dependency>
+
+        </dependencies>
+    </dependencyManagement>
 
     <build>
         <pluginManagement>
             <plugins>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.14.0</version>
+
+                    <configuration>
+                        <release>${java.version}</release>
+
+                        <annotationProcessorPaths>
+                            <path>
+                                <groupId>org.projectlombok</groupId>
+                                <artifactId>lombok</artifactId>
+                            </path>
+                        </annotationProcessorPaths>
+                    </configuration>
+                </plugin>
+
                 <plugin>
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-maven-plugin</artifactId>
+                    <configuration>
+                        <excludes>
+                            <exclude>
+                                <groupId>org.projectlombok</groupId>
+                                <artifactId>lombok</artifactId>
+                            </exclude>
+                        </excludes>
+                    </configuration>
                 </plugin>
+
             </plugins>
         </pluginManagement>
     </build>

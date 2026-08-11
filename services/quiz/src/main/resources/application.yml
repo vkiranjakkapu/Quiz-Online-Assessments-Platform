@@ -1,14 +1,23 @@
+server:
+    port: 8081
+
 spring:
     application:
         name: qoap-quiz-service
+    config:
+        import: configserver:http://localhost:8888
     datasource:
         driver-class-name: org.postgresql.Driver
-        url: jdbc:postgresql://localhost:5432/qoap_quiz
+        url: jdbc:postgresql://${database.host}:${database.port}/${database.name}
         username: admin
         password: admin
     jpa:
         hibernate:
-            ddl-auto: update
+            ddl-auto: create
+        show-sql: false
+        properties:
+            hibernate:
+                format_sql: true
     sql:
         init:
             mode: always
