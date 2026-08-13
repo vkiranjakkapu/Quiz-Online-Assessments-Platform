@@ -1,4 +1,4 @@
-package com.qoap.identity.dto;
+package com.qoap.quiz.dto;
 
 import java.util.List;
 

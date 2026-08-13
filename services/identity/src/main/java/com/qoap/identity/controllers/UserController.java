@@ -2,6 +2,7 @@ package com.qoap.identity.controllers;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
@@ -49,7 +50,7 @@ public class UserController {
     public ResponseEntity<APIResponseDto> me() {
         AuthenticatedUser user = authContext.getCurrentUser().orElse(null);
         return ResponseEntity
-                .ok(APIResponseDto.builder().body(userService.getUserById(UUID.fromString(user.getUserId()))).build());
+                .ok(APIResponseDto.builder().data(userService.getUserById(UUID.fromString(user.getUserId()))).build());
     }
 
     @Operation(summary = "Create User")
@@ -64,14 +65,14 @@ public class UserController {
             @Valid @RequestBody CreateUserRequestDto request) {
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(APIResponseDto.builder().body(userService.createUser(request)).build());
+                .body(APIResponseDto.builder().data(userService.createUser(request)).build());
     }
 
     @Operation(summary = "Get all users")
     @GetMapping("/")
     @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<APIResponseDto> getAllUsers() {
-        return ResponseEntity.ok(APIResponseDto.builder().body(userService.getAllUsers()).build());
+        return ResponseEntity.ok(APIResponseDto.builder().data(userService.getAllUsers()).build());
     }
 
     @Operation(summary = "Get all users by role")
@@ -84,14 +85,22 @@ public class UserController {
         } else {
             allUsers = userService.getAllUsersByRole(RoleType.ADMIN);
         }
-        return ResponseEntity.ok(APIResponseDto.builder().body(allUsers).build());
+        return ResponseEntity.ok(APIResponseDto.builder().data(allUsers).build());
     }
 
     @Operation(summary = "Get user by id")
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<APIResponseDto> getUserById(@PathVariable UUID id) {
-        return ResponseEntity.ok(APIResponseDto.builder().body(userService.getUserById(id)).build());
+        return ResponseEntity.ok(APIResponseDto.builder().data(userService.getUserById(id)).build());
+    }
+
+    @Operation(summary = "Get all users with ids")
+    @PostMapping("/search")
+    @PreAuthorize("hasAnyRole('ADMIN','AGENT','CUSTOMER')")
+    public ResponseEntity<APIResponseDto> getAllUsersWithIds(@RequestBody Set<UUID> ids) {
+        return ResponseEntity
+                .ok(APIResponseDto.builder().data(userService.getAllUsersWithIds(ids)).build());
     }
 
     @Operation(summary = "Update user")
@@ -101,7 +110,7 @@ public class UserController {
             @PathVariable UUID id,
             @Valid @RequestBody UpdateUserRequest request) {
 
-        return ResponseEntity.ok(APIResponseDto.builder().body(userService.updateUser(id, request)).build());
+        return ResponseEntity.ok(APIResponseDto.builder().data(userService.updateUser(id, request)).build());
     }
 
     @Operation(summary = "Change Password")
@@ -110,7 +119,7 @@ public class UserController {
     public ResponseEntity<APIResponseDto> changePassword(
             @Valid @RequestBody PasswordChangeRequestDto request) {
 
-        return ResponseEntity.ok(APIResponseDto.builder().body(userService.changePassword(request)).build());
+        return ResponseEntity.ok(APIResponseDto.builder().data(userService.changePassword(request)).build());
     }
 
     @Operation(summary = "Soft delete user")
@@ -122,6 +131,6 @@ public class UserController {
         HashMap<String, Boolean> body = new HashMap<>();
         body.put("status", true);
 
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(APIResponseDto.builder().body(body).build());
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(APIResponseDto.builder().data(body).build());
     }
 }

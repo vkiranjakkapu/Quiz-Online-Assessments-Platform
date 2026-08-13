@@ -253,6 +253,20 @@ class UserServiceImplTest {
 	}
 
 	@Test
+	void getAllUsersWithIds_ShouldReturnUsers() {
+
+		when(userRepository.findByIdIn(List.of(USER_ID)))
+				.thenReturn(List.of(admin));
+
+		List<UserResponse> users = userService.getAllUsersWithIds(List.of(USER_ID));
+
+		assertEquals(1, users.size());
+		assertEquals(USER_ID, users.getFirst().id());
+
+		verify(userRepository).findByIdIn(List.of(USER_ID));
+	}
+
+	@Test
 	void getUserById_ShouldReturnUser() {
 
 		when(userRepository.findById(USER_ID))

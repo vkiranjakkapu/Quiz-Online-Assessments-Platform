@@ -1,6 +1,7 @@
 package com.qoap.quiz.services;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import com.qoap.quiz.dto.AutoSaveRequestDto;
@@ -11,6 +12,10 @@ import com.qoap.quiz.models.Attempt;
 public interface AttemptsService {
 
     List<Attempt> getAllAttempts();
+
+    List<Attempt> getAllAttemptsByQuizId(UUID quizId);
+
+    List<Attempt> getAllAttemptsByQuizIds(Set<UUID> quizIds);
 
     List<Attempt> getAllAttemptsByStatus(CompletionStatus status);
 

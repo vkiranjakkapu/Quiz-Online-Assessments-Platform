@@ -32,7 +32,7 @@ public class AuthController {
     })
     @PostMapping("/login")
     public ResponseEntity<APIResponseDto> login(@Valid @RequestBody LoginRequestDto request) {
-        return ResponseEntity.ok(APIResponseDto.builder().body(authenticationService.login(request)).build());
+        return ResponseEntity.ok(APIResponseDto.builder().data(authenticationService.login(request)).build());
     }
 
     @Operation(summary = "Refresh access token")
@@ -42,7 +42,7 @@ public class AuthController {
     })
     @PostMapping("/refresh")
     public ResponseEntity<APIResponseDto> refresh(@Valid @RequestBody RefreshTokenRequest request) {
-        return ResponseEntity.ok(APIResponseDto.builder().body(authenticationService.refresh(request)).build());
+        return ResponseEntity.ok(APIResponseDto.builder().data(authenticationService.refresh(request)).build());
     }
 
     @Operation(summary = "Logout user")

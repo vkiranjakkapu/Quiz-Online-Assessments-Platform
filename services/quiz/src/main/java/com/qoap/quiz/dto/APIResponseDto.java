@@ -9,8 +9,12 @@ import lombok.Builder;
 @Builder
 public record APIResponseDto(ResponseStatus status, Object data, LocalDateTime timestamp) {
 
-    public APIResponseDto() {
-        this(ResponseStatus.SUCCESS, null, LocalDateTime.now());
+    public APIResponseDto {
+        if (status == null) {
+            status = ResponseStatus.SUCCESS;
+        }
+        if (timestamp == null) {
+            timestamp = LocalDateTime.now();
+        }
     }
-
 }

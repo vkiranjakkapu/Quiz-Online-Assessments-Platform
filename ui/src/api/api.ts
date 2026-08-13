@@ -68,11 +68,11 @@ export async function apiClient<T>({
 
         const apiResponse = response.data as {
             status: string;
-            body: T;
+            data: T;
             timestamp: string;
         };
 
-        return apiResponse.body;
+        return apiResponse.data;
     } catch (er) {
         return handleErrorResponse(er);
     }

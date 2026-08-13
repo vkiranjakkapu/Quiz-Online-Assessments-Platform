@@ -3,6 +3,7 @@ package com.qoap.quiz.services.imp;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -15,6 +16,7 @@ import com.qoap.quiz.enums.CompletionStatus;
 import com.qoap.quiz.exceptions.ResourceNotFoundException;
 import com.qoap.quiz.models.Answer;
 import com.qoap.quiz.models.Attempt;
+import com.qoap.quiz.models.Quiz;
 import com.qoap.quiz.repositories.AttemptRepository;
 import com.qoap.quiz.services.AnswersService;
 import com.qoap.quiz.services.AttemptsService;
@@ -39,6 +41,18 @@ public class AttemptsServiceImp implements AttemptsService {
     @Transactional(readOnly = true)
     public List<Attempt> getAllAttempts() {
         return attemptRepository.findAll();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Attempt> getAllAttemptsByQuizId(UUID quizId) {
+        return attemptRepository.findAllByQuiz(Quiz.builder().id(quizId).build());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Attempt> getAllAttemptsByQuizIds(Set<UUID> quizIds) {
+        return attemptRepository.findAllByQuizIdIn(quizIds);
     }
 
     @Override

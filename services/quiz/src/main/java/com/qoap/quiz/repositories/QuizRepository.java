@@ -1,5 +1,6 @@
 package com.qoap.quiz.repositories;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -13,5 +14,7 @@ public interface QuizRepository extends JpaRepository<Quiz, UUID> {
 
     @Query(value = "SELECT * FROM quizzes WHERE to_tsvector('english', title) @@ plainto_tsquery('english', :searchTerm)", nativeQuery = true)
     List<Quiz> searchByTitleFts(@Param("searchTerm") String searchTerm);
+
+    List<Quiz> findAllByCreatedAtBetween(LocalDateTime start, LocalDateTime end);
 
 }

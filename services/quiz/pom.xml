@@ -10,13 +10,22 @@
 		<relativePath>../pom.xml</relativePath> <!-- lookup parent from repository -->
 	</parent>
 
-	<groupId>com.qoap.quiz</groupId>
 	<artifactId>quiz</artifactId>
 	<packaging>jar</packaging>
 
 	<name>Quiz Service</name>
 
 	<dependencies>
+
+		<dependency>
+			<groupId>com.labmantix.platform</groupId>
+			<artifactId>restclient</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.labmantix.platform</groupId>
+			<artifactId>web</artifactId>
+		</dependency>
 
 		<dependency>
 			<groupId>com.labmantix.platform</groupId>

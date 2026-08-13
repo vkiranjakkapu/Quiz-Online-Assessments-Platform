@@ -164,6 +164,21 @@ class UserControllerTest {
 	}
 
 	@Test
+	void getAllUsersWithIds_ShouldReturn200() throws Exception {
+
+		UUID id = UUID.fromString("c0186249-9fc1-4927-97b3-a08a21febfe3");
+
+		when(userService.getAllUsersWithIds(List.of(id)))
+				.thenReturn(List.of(response()));
+
+		mockMvc.perform(post("/identity/api/v1/users/search")
+				.with(adminJwt())
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(jsonMapper.writeValueAsString(List.of(id))))
+				.andExpect(status().isOk());
+	}
+
+	@Test
 	void updateUser_InvalidRequest_ShouldReturn400() throws Exception {
 
 		UpdateUserRequest request = new UpdateUserRequest(

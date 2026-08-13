@@ -20,3 +20,8 @@ spring:
               uri: lb://qoap-quiz-service
               predicates:
                 - Path=/quiz/**
+
+            - id: qoap-reports-service
+              uri: lb://qoap-reports-service
+              predicates:
+                - Path=/reports/**
