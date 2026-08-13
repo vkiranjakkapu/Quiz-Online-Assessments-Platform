@@ -1,5 +1,9 @@
 package com.qoap.quiz.services.imp;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.YearMonth;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -7,6 +11,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.qoap.quiz.dto.CreateQuizRequestDto;
 import com.qoap.quiz.dto.UpdateOptionDto;
@@ -30,17 +35,49 @@ public class QuizServiceImp implements QuizService {
     private final QuestionRepository questionRepository;
 
     @Override
+    @Transactional(readOnly = true)
     public Quiz getQuizById(UUID id) {
         return quizRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Quiz not found with given ID"));
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Quiz> getAllQuizzes() {
         return quizRepository.findAll();
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public List<Quiz> getAllQuizzesBetween(LocalDateTime start, LocalDateTime end) {
+        return quizRepository.findAllByCreatedAtBetween(start, end);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Map<LocalDate, List<Quiz>> getAllQuizzesPerDayInMonth() {
+
+        List<Quiz> allQuizzesThisMonth = getAllQuizzesBetween(
+                LocalDate.now().withDayOfMonth(1).atStartOfDay(),
+                YearMonth.now().atEndOfMonth().atTime(LocalTime.MAX));
+
+        return allQuizzesThisMonth.stream()
+                .collect(Collectors.groupingBy(quiz -> quiz.getCreatedAt().toLocalDate()));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Map<LocalDate, List<Quiz>> getAllQuizzesPerDayInMonth(YearMonth month) {
+
+        List<Quiz> allQuizzesInGivenMonth = getAllQuizzesBetween(month.atDay(1).atStartOfDay(),
+                month.atEndOfMonth().atTime(LocalTime.MAX));
+
+        return allQuizzesInGivenMonth.stream()
+                .collect(Collectors.groupingBy(quiz -> quiz.getCreatedAt().toLocalDate()));
+    }
+
+    @Override
+    @Transactional
     public Quiz createQuiz(CreateQuizRequestDto request) {
 
         Quiz quiz = new Quiz();
@@ -78,6 +115,7 @@ public class QuizServiceImp implements QuizService {
     }
 
     @Override
+    @Transactional
     public Quiz updateQuiz(UUID qid, UpdateQuizRequestDto request) {
         Quiz quiz = getQuizById(qid);
         quiz.setTitle(request.title());

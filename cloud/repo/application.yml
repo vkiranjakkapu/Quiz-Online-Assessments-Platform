@@ -9,6 +9,7 @@ services:
     uri:
         identity: http://qoap-identity-service/identity/api/v1
         quiz: http://qoap-quiz-service/quiz/api/v1
+        reports: http://qoap-reports-service/reports/api/v1
 
 eureka:
     props:
@@ -17,6 +18,8 @@ eureka:
     client:
         register-with-eureka: true
         fetch-registry: true
+        webclient:
+            enabled: true
         service-url:
             defaultZone: ${eureka.props.defaultZone}
     instance:

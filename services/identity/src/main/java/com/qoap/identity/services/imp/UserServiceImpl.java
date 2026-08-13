@@ -1,5 +1,6 @@
 package com.qoap.identity.services.imp;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -99,6 +100,16 @@ public class UserServiceImpl implements UserService {
 		Role role = roleRepository.findByName(type)
 				.orElseThrow(() -> new ResourceNotFoundException("Role not found: " + type));
 		return userRepository.findAllByRolesAndDeletedFalse(Set.of(role)).stream().map(this::mapToResponse).toList();
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public List<UserResponse> getAllUsersWithIds(Collection<UUID> ids) {
+
+		return userRepository.findByIdIn(ids)
+				.stream()
+				.map(this::mapToResponse)
+				.toList();
 	}
 
 	@Override

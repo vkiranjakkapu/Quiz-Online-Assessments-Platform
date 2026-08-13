@@ -1,5 +1,6 @@
 package com.qoap.identity.services;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -15,6 +16,8 @@ public interface UserService {
     List<UserResponse> getAllUsers();
 
     List<UserResponse> getAllUsersByRole(RoleType role);
+
+    List<UserResponse> getAllUsersWithIds(Collection<UUID> ids);
 
     UserResponse getUserById(UUID id);
 

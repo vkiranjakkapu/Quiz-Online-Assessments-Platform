@@ -1,5 +1,6 @@
 package com.qoap.quiz.controllers;
 
+import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
@@ -55,7 +56,18 @@ public class AttemptController {
         return ResponseEntity.ok(APIResponseDto.builder().data(attemptsService.getAllAttemptsByStatus(status)).build());
     }
 
-    @PostMapping("/begin/{quizId}")
+    @GetMapping("/quiz/{quizId}")
+    public ResponseEntity<APIResponseDto> getAllAttemptsByQuizId(@PathVariable UUID quizId) {
+        return ResponseEntity.ok(APIResponseDto.builder().data(attemptsService.getAllAttemptsByQuizId(quizId)).build());
+    }
+
+    @PostMapping("/quiz")
+    public ResponseEntity<APIResponseDto> getAllAttemptsByQuizIds(@RequestBody Set<UUID> quizIds) {
+        return ResponseEntity
+                .ok(APIResponseDto.builder().data(attemptsService.getAllAttemptsByQuizIds(quizIds)).build());
+    }
+
+    @PostMapping("/quiz/{quizId}")
     public ResponseEntity<APIResponseDto> createAttempt(@PathVariable Long quizId) {
         return ResponseEntity.ok(APIResponseDto.builder().data(null).build());
     }

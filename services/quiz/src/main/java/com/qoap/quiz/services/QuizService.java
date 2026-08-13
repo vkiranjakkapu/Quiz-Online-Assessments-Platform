@@ -1,6 +1,10 @@
 package com.qoap.quiz.services;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.YearMonth;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import com.qoap.quiz.dto.CreateQuizRequestDto;
@@ -12,6 +16,12 @@ public interface QuizService {
     Quiz getQuizById(UUID id);
 
     List<Quiz> getAllQuizzes();
+
+    List<Quiz> getAllQuizzesBetween(LocalDateTime start, LocalDateTime end);
+
+    Map<LocalDate, List<Quiz>> getAllQuizzesPerDayInMonth();
+
+    Map<LocalDate, List<Quiz>> getAllQuizzesPerDayInMonth(YearMonth month);
 
     Quiz createQuiz(CreateQuizRequestDto request);
 
