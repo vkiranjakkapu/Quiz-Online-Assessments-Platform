@@ -100,11 +100,13 @@ export default function Navbar({
                     />
                     <div className="inline-flex gap-2 md:hidden">
                         <ActionButton
+                            theme="primary"
                             onClick={() => setIsDarkMode(!isDarkMode)}
                             icon={isDarkMode ? SunIcon : MoonIcon}
                             padding="p-1.5"
                         />
                         <ActionButton
+                            theme="primary"
                             onClick={() => setOpenNav(!openNav)}
                             icon={openNav ? XMarkIcon : Bars3Icon}
                             padding="p-1.5"
@@ -125,7 +127,7 @@ export default function Navbar({
                             <div
                                 onClick={() => navigate(item.path)}
                                 key={idx}
-                                className={`px-2 py-1 text-sm inline-flex items-center gap-1.5 cursor-pointer rounded-full ${isActive ? "bg-primary text-slate-50 dark:bg-slate-700 outline outline-offset-1 outline-primary dark:outline-slate-700" : "text-slate-400 hover:text-slate-600 dark:text-slate-500"}`}
+                                className={`px-2 py-1 text-sm inline-flex items-center gap-1.5 cursor-pointer rounded-full ${isActive ? "bg-primary text-slate-50 dark:bg-slate-700 outline outline-offset-2 outline-primary dark:outline-slate-700" : "text-slate-400 hover:text-slate-600 dark:text-slate-500"}`}
                             >
                                 <IconComponent className="size-5" />
                                 <span>{item.text}</span>
@@ -152,7 +154,7 @@ export default function Navbar({
                     ) : (
                         <div
                             onClick={() => navigate(RoutePaths.PROFILE)}
-                            className="p-1.5 cursor-pointer inline-flex gap-1 items-center justify-between rounded-full bg-primary dark:bg-slate-700 text-white outline outline-offset-1 outline-primary dark:outline-slate-700"
+                            className="p-1.5 cursor-pointer inline-flex gap-1 items-center justify-between rounded-full bg-primary dark:bg-slate-700 text-white outline outline-offset-2 outline-primary dark:outline-slate-700"
                         >
                             <img
                                 src={UserDP}
@@ -197,7 +199,7 @@ export default function Navbar({
                                     <li
                                         onClick={() => navigate(item.path)}
                                         key={idx}
-                                        className={`py-1.5 px-2 shadow-sm outline outline-offset-1 outline-primary dark:outline-slate-600 inline-flex gap-2 items-center cursor-pointer rounded text-white hover:bg-primary dark:hover:bg-slate-900
+                                        className={`py-1.5 px-2 shadow-sm outline outline-offset-2 outline-primary dark:outline-slate-600 inline-flex gap-2 items-center cursor-pointer rounded text-white hover:bg-primary dark:hover:bg-slate-900
                             ${isActive ? "bg-primary dark:bg-slate-900" : "bg-primary/80 dark:bg-slate-900/70"}
                             `}
                                     >
@@ -212,14 +214,14 @@ export default function Navbar({
                                     <>
                                         <li
                                             onClick={handleLoginClick}
-                                            className="outline outline-offset-1 outline-primary dark:outline-slate-600 flex-1 py-1.5 px-2 inline-flex gap-2 items-center justify-center cursor-pointer rounded text-white bg-primary/80 dark:bg-slate-900/70 hover:bg-primary dark:hover:bg-slate-900/90"
+                                            className="outline outline-offset-2 outline-primary dark:outline-slate-600 flex-1 py-1.5 px-2 inline-flex gap-2 items-center justify-center cursor-pointer rounded text-white bg-primary/80 dark:bg-slate-900/70 hover:bg-primary dark:hover:bg-slate-900/90"
                                         >
                                             <ArrowRightEndOnRectangleIcon className="size-4.5" />
                                             <span>Login</span>
                                         </li>
                                         <li
                                             onClick={handleRegisterClick}
-                                            className="outline outline-offset-1 outline-primary dark:outline-slate-600 flex-1 py-1.5 px-2 inline-flex gap-2 items-center justify-center cursor-pointer rounded text-white bg-primary/80 dark:bg-slate-900/70 hover:bg-primary dark:hover:bg-slate-900/90"
+                                            className="outline outline-offset-2 outline-primary dark:outline-slate-600 flex-1 py-1.5 px-2 inline-flex gap-2 items-center justify-center cursor-pointer rounded text-white bg-primary/80 dark:bg-slate-900/70 hover:bg-primary dark:hover:bg-slate-900/90"
                                         >
                                             <HeartIcon className="size-4.5" />
                                             <span>Register</span>
@@ -227,7 +229,7 @@ export default function Navbar({
                                     </>
                                 ) : (
                                     <>
-                                        <li className="outline outline-offset-1 outline-primary dark:outline-slate-600 flex-1 py-1.5 px-2 inline-flex gap-2 items-center justify-center cursor-pointer rounded text-white bg-primary/80 dark:bg-slate-900/70 hover:bg-primary dark:hover:bg-slate-900/90">
+                                        <li className="outline outline-offset-2 outline-primary dark:outline-slate-600 flex-1 py-1.5 px-2 inline-flex gap-2 items-center justify-center cursor-pointer rounded text-white bg-primary/80 dark:bg-slate-900/70 hover:bg-primary dark:hover:bg-slate-900/90">
                                             <img
                                                 src={UserDP}
                                                 className="size-6 bg-white rounded-full"
@@ -236,7 +238,7 @@ export default function Navbar({
                                         </li>
                                         <li
                                             onClick={logout}
-                                            className="outline outline-offset-1 outline-primary dark:outline-slate-600 flex-1 py-1.5 px-2 inline-flex gap-2 items-center justify-center cursor-pointer rounded text-white bg-primary/80 dark:bg-slate-900/70 hover:bg-primary dark:hover:bg-slate-900/90"
+                                            className="outline outline-offset-2 outline-primary dark:outline-slate-600 flex-1 py-1.5 px-2 inline-flex gap-2 items-center justify-center cursor-pointer rounded text-white bg-primary/80 dark:bg-slate-900/70 hover:bg-primary dark:hover:bg-slate-900/90"
                                         >
                                             <ArrowLeftStartOnRectangleIcon className="size-4.5" />
                                             <span>Logout</span>

@@ -4,12 +4,12 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.springframework.stereotype.Service;
 
@@ -29,55 +29,45 @@ public class ReportsServiceImp implements ReportsService {
 
 	@Override
 	public List<QuizTrendsResponseDto> getQuizReports() {
-
-		List<QuizTrendsResponseDto> reports = new ArrayList<QuizTrendsResponseDto>();
-
-		Map<LocalDate, List<Quiz>> allQuizzesPerDayInMonth = quizService.getAllQuizzesPerDayInMonth();
-		if (allQuizzesPerDayInMonth.size() == 0) {
-			return reports;
-		}
-
-		Set<UUID> allQuizIds = allQuizzesPerDayInMonth.values().stream().flatMap(Collection::stream)
-				.map(Quiz::getId)
-				.collect(Collectors.toSet());
-		Map<Quiz, List<Attempt>> attemptsPerQuiz = quizService.getAttemptsByQuizIds(allQuizIds).stream()
-				.collect(Collectors.groupingBy(Attempt::getQuiz));
-
-		allQuizzesPerDayInMonth.forEach((date, quizzes) -> {
-			reports.add(QuizTrendsResponseDto.builder()
-					.date(date)
-					.quizzes(quizzes.size())
-					.attempts(quizzes.stream().flatMap(q -> Stream.of(attemptsPerQuiz.get(q)))
-							.count())
-					.build());
-		});
-		return reports;
+		return getQuizReports(YearMonth.now());
 	}
 
 	@Override
 	public List<QuizTrendsResponseDto> getQuizReports(YearMonth month) {
 
-		List<QuizTrendsResponseDto> reports = new ArrayList<QuizTrendsResponseDto>();
+		List<QuizTrendsResponseDto> reports = new ArrayList<>();
 
 		Map<LocalDate, List<Quiz>> allQuizzesPerDayInMonth = quizService.getAllQuizzesPerDayInMonth(month);
-		if (allQuizzesPerDayInMonth.size() == 0) {
-			return reports;
-		}
 
-		Set<UUID> allQuizIds = allQuizzesPerDayInMonth.values().stream().flatMap(Collection::stream)
+		Set<UUID> allQuizIds = allQuizzesPerDayInMonth.values().stream()
+				.flatMap(Collection::stream)
 				.map(Quiz::getId)
 				.collect(Collectors.toSet());
+
 		Map<Quiz, List<Attempt>> attemptsPerQuiz = quizService.getAttemptsByQuizIds(allQuizIds).stream()
 				.collect(Collectors.groupingBy(Attempt::getQuiz));
 
-		allQuizzesPerDayInMonth.forEach((date, quizzes) -> {
+		LocalDate today = LocalDate.now();
+		LocalDate firstDay = month.atDay(1);
+		LocalDate lastDayToReport = month.equals(YearMonth.from(today))
+				? today
+				: month.atEndOfMonth();
+
+		// ? Fill report for every day in range (populating 0s for missing days)
+		for (LocalDate date = firstDay; !date.isAfter(lastDayToReport); date = date.plusDays(1)) {
+			List<Quiz> quizzes = allQuizzesPerDayInMonth.getOrDefault(date, Collections.emptyList());
+
+			int totalAttempts = quizzes.stream()
+					.mapToInt(q -> attemptsPerQuiz.getOrDefault(q, Collections.emptyList()).size())
+					.sum();
+
 			reports.add(QuizTrendsResponseDto.builder()
 					.date(date)
 					.quizzes(quizzes.size())
-					.attempts(quizzes.stream().flatMap(q -> Stream.of(attemptsPerQuiz.get(q)))
-							.count())
+					.attempts(totalAttempts)
 					.build());
-		});
+		}
+
 		return reports;
 	}
 

@@ -88,3 +88,4 @@ CREATE TABLE IF NOT EXISTS answers (
 CREATE INDEX IF NOT EXISTS idx_quizzes_category ON quizzes(category_id);
 CREATE INDEX IF NOT EXISTS idx_quizzes_created_at ON quizzes(created_at);
 CREATE INDEX IF NOT EXISTS idx_quizzes_title_fts ON quizzes USING gin (to_tsvector('english', title));
+CREATE INDEX IF NOT EXISTS idx_categories_title_fts ON categories USING gin (to_tsvector('english', name));

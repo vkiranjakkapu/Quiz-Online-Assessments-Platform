@@ -85,7 +85,7 @@ export default function LandingPage() {
                             <span className="capitalize">email</span>
                             <input
                                 onChange={(e) => setEmail(e.target.value)}
-                                className="py-1 px-2 w-full rounded-full border border-slate-300 dark:border-slate-700 outline outline-slate-300 outline-offset-1 dark:outline-slate-600"
+                                className="py-1 px-2 w-full rounded-full border border-slate-300 dark:border-slate-700 outline outline-slate-300 outline-offset-2 dark:outline-slate-600"
                                 placeholder="email"
                                 type="email"
                                 name="email"
@@ -95,7 +95,7 @@ export default function LandingPage() {
                             <span className="capitalize">password</span>
                             <input
                                 onChange={(e) => setPassword(e.target.value)}
-                                className="py-1 px-2 w-full rounded-full border border-slate-300 dark:border-slate-700 outline outline-slate-300 outline-offset-1 dark:outline-slate-600"
+                                className="py-1 px-2 w-full rounded-full border border-slate-300 dark:border-slate-700 outline outline-slate-300 outline-offset-2 dark:outline-slate-600"
                                 placeholder="password"
                                 type="password"
                                 name="password"

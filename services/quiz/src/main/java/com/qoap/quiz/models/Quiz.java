@@ -47,7 +47,7 @@ public class Quiz {
     @Column(length = 400, nullable = false)
     private String description;
 
-    @ManyToOne
+    @ManyToOne(cascade = { CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH })
     @JoinColumn(name = "category_id")
     private Category category;
 

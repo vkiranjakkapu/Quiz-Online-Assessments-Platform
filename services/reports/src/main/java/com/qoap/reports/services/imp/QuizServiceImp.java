@@ -73,7 +73,7 @@ public class QuizServiceImp implements QuizService {
     public List<Attempt> getAttemptsByQuizIds(Set<UUID> quizIds) {
         try {
             RestResponseDto<List<Attempt>> response = restClient.post()
-                    .uri(QUIZ_SERVICE_URL + "/quiz")
+                    .uri(QUIZ_SERVICE_URL + "/attempts/quiz")
                     .body(quizIds)
                     .retrieve()
                     .body(new ParameterizedTypeReference<RestResponseDto<List<Attempt>>>() {

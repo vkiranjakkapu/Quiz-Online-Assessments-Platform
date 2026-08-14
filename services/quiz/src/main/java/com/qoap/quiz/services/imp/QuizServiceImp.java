@@ -6,6 +6,7 @@ import java.time.LocalTime;
 import java.time.YearMonth;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -16,7 +17,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.qoap.quiz.dto.CreateQuizRequestDto;
 import com.qoap.quiz.dto.UpdateOptionDto;
 import com.qoap.quiz.dto.UpdateQuizRequestDto;
+import com.qoap.quiz.exceptions.DuplicateResourceException;
 import com.qoap.quiz.exceptions.ResourceNotFoundException;
+import com.qoap.quiz.models.Category;
 import com.qoap.quiz.models.Question;
 import com.qoap.quiz.models.QuestionOption;
 import com.qoap.quiz.models.Quiz;
@@ -33,6 +36,7 @@ public class QuizServiceImp implements QuizService {
 
     private final QuizRepository quizRepository;
     private final QuestionRepository questionRepository;
+    private final CategoryService categoryService;
 
     @Override
     @Transactional(readOnly = true)
@@ -83,7 +87,20 @@ public class QuizServiceImp implements QuizService {
         Quiz quiz = new Quiz();
         quiz.setTitle(request.title());
         quiz.setDescription(request.description());
-        quiz.setCategory(request.category());
+        quiz.setStatus(request.status());
+
+        Category category = Optional.ofNullable(request.category().id()).map(id -> categoryService.getCategoryById(id))
+                .orElseGet(() -> {
+                    try {
+                        categoryService.getCategoryByName(request.category().name());
+                        throw new DuplicateResourceException("Category with given name already exists.");
+                    } catch (ResourceNotFoundException e) {
+                        // ? Proceed to create new category
+                        return Category.builder().name(request.category().name())
+                                .description(request.category().description()).build();
+                    }
+                });
+        quiz.setCategory(category);
 
         QuizSettings settings = QuizSettings.builder()
                 .difficulty(request.settings().difficulty())
