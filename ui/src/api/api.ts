@@ -1,6 +1,6 @@
 import axios from "axios";
 import { AppConfig } from "../config/AppConfig";
-import { handleErrorResponse } from "../utils/DurationHelper";
+import { handleErrorResponse } from "../utils/ErrorHandler";
 import configureRequestInterceptor from "./RequestInterceptor";
 import configureResponseInterceptor from "./ResponseInterceptor";
 
