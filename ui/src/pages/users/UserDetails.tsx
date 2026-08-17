@@ -7,18 +7,16 @@ export default function UserDetails() {
 
     return (
         <SectionLayout
-            breadCrumbs={{
-                anchors: [
-                    {
-                        text: "Users",
-                        uri: RoutePaths.USERS,
-                    },
-                    {
-                        text: "User id: " + userId,
-                        uri: RoutePaths.USER_DETAILS,
-                    },
-                ],
-            }}
+            breadCrumbs={[
+                {
+                    text: "Users",
+                    uri: RoutePaths.USERS,
+                },
+                {
+                    text: "User id: " + userId,
+                    uri: RoutePaths.USER_DETAILS,
+                },
+            ]}
             description={`User Details for ${userId}`}
         >
             <h1>User Details</h1>

@@ -1,6 +1,40 @@
 import { apiClient, type ErrorResponse } from "../api/api";
 
 class QuizService {
+    async getQuizById<T>(quizId: string): Promise<T | ErrorResponse> {
+        return apiClient({
+            type: "get",
+            service: "quiz",
+            uri: "/" + quizId,
+        });
+    }
+
+    async getAllQuizzes<T>(): Promise<T | ErrorResponse> {
+        return apiClient({
+            type: "get",
+            service: "quiz",
+            uri: "/",
+        });
+    }
+
+    async getAllQuizzesByCategory<T>(
+        category?: number,
+    ): Promise<T | ErrorResponse> {
+        return apiClient({
+            type: "get",
+            service: "quiz",
+            uri: "/category/" + category,
+        });
+    }
+
+    async getAllQuizzesByTitle<T>(title?: string): Promise<T | ErrorResponse> {
+        return apiClient({
+            type: "get",
+            service: "quiz",
+            uri: "/title/" + title,
+        });
+    }
+
     async getAllCategories<T>(): Promise<T | ErrorResponse> {
         return apiClient({
             type: "get",
@@ -15,6 +49,38 @@ class QuizService {
             service: "quiz",
             uri: "/",
             payload,
+        });
+    }
+
+    async updateQuiz<T>(
+        quizId: unknown,
+        payload: unknown,
+    ): Promise<T | ErrorResponse> {
+        return apiClient({
+            type: "put",
+            service: "quiz",
+            uri: "/" + quizId,
+            payload,
+        });
+    }
+
+    async updateQuizStatus<T>(
+        quizId: unknown,
+        payload: unknown,
+    ): Promise<T | ErrorResponse> {
+        return apiClient({
+            type: "patch",
+            service: "quiz",
+            uri: "/" + quizId,
+            payload,
+        });
+    }
+
+    async deleteQuiz<T>(quizId: unknown): Promise<T | ErrorResponse> {
+        return apiClient({
+            type: "delete",
+            service: "quiz",
+            uri: "/" + quizId,
         });
     }
 }
@@ -69,6 +135,7 @@ export interface QuestionOption {
     question?: Question;
     optionText?: string;
     isCorrect?: boolean;
+    createdAt?: string;
 }
 
 export const QuizStatus = {

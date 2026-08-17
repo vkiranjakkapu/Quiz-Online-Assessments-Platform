@@ -1,5 +1,9 @@
 package com.qoap.quiz.models;
 
+import java.time.LocalDateTime;
+
+import org.hibernate.annotations.CreationTimestamp;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Entity;
@@ -37,5 +41,8 @@ public class QuestionOption {
 
     @Builder.Default
     private Boolean isCorrect = false;
+
+    @CreationTimestamp
+    private LocalDateTime createdAt;
 
 }

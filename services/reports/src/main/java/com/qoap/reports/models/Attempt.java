@@ -38,10 +38,8 @@ public class Attempt {
 
     private Duration timeSpent;
 
-    @Builder.Default
-    private CompletionStatus status = CompletionStatus.IN_PROGRESS;
+    private CompletionStatus status;
 
-    @Builder.Default
-    private LocalDateTime attemptTime = LocalDateTime.now();
+    private LocalDateTime attemptTime;
 
 }

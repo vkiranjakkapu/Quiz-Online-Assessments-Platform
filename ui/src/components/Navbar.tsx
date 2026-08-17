@@ -75,7 +75,7 @@ export default function Navbar({
         {
             text: "Attempts",
             icon: Square2StackIcon,
-            path: RoutePaths.ATTEMPT,
+            path: RoutePaths.ATTEMPTS,
             roles: ["ADMIN", "STUDENT"],
         },
         {
@@ -91,7 +91,7 @@ export default function Navbar({
             {openNav && (
                 <div className="absolute md:hidden bg-slate-900/20 dark:bg-slate-900/30 h-full w-full z-0 backdrop-blur-sm"></div>
             )}
-            <nav className="sticky top-0 w-full z-50 py-2 px-0 md:px-8 bg-slate-100 text-primary dark:bg-gray-800 dark:text-white flex flex-col md:flex-row items-center justify-between shadow-sm">
+            <nav className="sticky top-0 w-full z-50 py-2 px-0 md:px-8 bg-slate-50 text-primary dark:bg-gray-800 dark:text-white flex flex-col md:flex-row items-center justify-between shadow-sm">
                 <div className="px-4 w-full md:w-1/5 inline-flex gap-3 items-center justify-between md:justify-center">
                     <img
                         src={Logo}

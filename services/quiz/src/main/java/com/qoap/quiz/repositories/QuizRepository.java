@@ -18,6 +18,6 @@ public interface QuizRepository extends JpaRepository<Quiz, UUID> {
 
     List<Quiz> findAllByCreatedAtBetween(LocalDateTime start, LocalDateTime end);
 
-    List<Category> findAllByCategory(Category category);
+    List<Quiz> findAllByCategory(Category category);
 
 }

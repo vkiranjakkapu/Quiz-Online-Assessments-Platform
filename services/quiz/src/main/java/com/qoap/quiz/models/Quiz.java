@@ -54,12 +54,15 @@ public class Quiz {
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private QuizSettings settings;
 
-    @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Question> questions;
 
     @Builder.Default
     @Enumerated(EnumType.STRING)
     private QuizStatus status = QuizStatus.DRAFT;
+
+    @Builder.Default
+    private Boolean isDeleted = false;
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;

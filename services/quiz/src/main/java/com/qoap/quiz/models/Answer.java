@@ -1,5 +1,10 @@
 package com.qoap.quiz.models;
 
+import java.time.LocalDateTime;
+
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -39,5 +44,11 @@ public class Answer {
     private QuestionOption selectedOption;
 
     private Boolean isCorrect;
+
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
+
+    @CreationTimestamp
+    private LocalDateTime createdAt;
 
 }

@@ -1,5 +1,7 @@
 package com.qoap.reports.models;
 
+import java.time.LocalDateTime;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -19,7 +21,8 @@ public class QuestionOption {
 
     private String optionText;
 
-    @Builder.Default
-    private Boolean isCorrect = false;
+    private Boolean isCorrect;
+
+    private LocalDateTime createdAt;
 
 }

@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.YearMonth;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -16,7 +18,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.qoap.quiz.dto.CreateQuizRequestDto;
 import com.qoap.quiz.dto.UpdateOptionDto;
+import com.qoap.quiz.dto.UpdateQuestionDto;
 import com.qoap.quiz.dto.UpdateQuizRequestDto;
+import com.qoap.quiz.enums.QuizStatus;
 import com.qoap.quiz.exceptions.DuplicateResourceException;
 import com.qoap.quiz.exceptions.ResourceNotFoundException;
 import com.qoap.quiz.models.Category;
@@ -24,7 +28,6 @@ import com.qoap.quiz.models.Question;
 import com.qoap.quiz.models.QuestionOption;
 import com.qoap.quiz.models.Quiz;
 import com.qoap.quiz.models.QuizSettings;
-import com.qoap.quiz.repositories.QuestionRepository;
 import com.qoap.quiz.repositories.QuizRepository;
 import com.qoap.quiz.services.QuizService;
 
@@ -35,7 +38,6 @@ import lombok.RequiredArgsConstructor;
 public class QuizServiceImp implements QuizService {
 
     private final QuizRepository quizRepository;
-    private final QuestionRepository questionRepository;
     private final CategoryService categoryService;
 
     @Override
@@ -49,6 +51,12 @@ public class QuizServiceImp implements QuizService {
     @Transactional(readOnly = true)
     public List<Quiz> getAllQuizzes() {
         return quizRepository.findAll();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Quiz> getAllQuizzesByTitle(String title) {
+        return quizRepository.searchByTitleFts(title);
     }
 
     @Override
@@ -89,6 +97,10 @@ public class QuizServiceImp implements QuizService {
         quiz.setDescription(request.description());
         quiz.setStatus(request.status());
 
+        if (quiz.getStatus().equals(QuizStatus.DRAFT)) {
+
+        }
+
         Category category = Optional.ofNullable(request.category().id()).map(id -> categoryService.getCategoryById(id))
                 .orElseGet(() -> {
                     try {
@@ -111,23 +123,33 @@ public class QuizServiceImp implements QuizService {
                 .build();
         quiz.setSettings(settings);
 
-        Set<Question> questions = request.questions().stream().map(reqQue -> {
-            Question que = new Question();
-            que.setQuiz(quiz);
-            que.setQuestionText(reqQue.questionText());
-            que.setMarks(reqQue.marks());
-            que.setExplanation(reqQue.explanation());
-            que.setDifficulty(reqQue.difficulty());
+        Set<Question> questions = Optional.ofNullable(request.questions()).orElseGet(Collections::emptySet).stream()
+                .map(reqQue -> {
+                    Question que = new Question();
+                    que.setQuiz(quiz);
+                    que.setQuestionText(reqQue.questionText());
+                    que.setMarks(reqQue.marks());
+                    que.setExplanation(reqQue.explanation());
+                    que.setDifficulty(reqQue.difficulty());
 
-            Set<QuestionOption> options = reqQue.options().stream().map(opt -> QuestionOption.builder().question(que)
-                    .optionText(opt.optionText()).isCorrect(opt.isCorrect()).build())
-                    .collect(Collectors.toSet());
-            que.setOptions(options);
+                    Set<QuestionOption> options = Optional.ofNullable(reqQue.options()).orElseGet(Collections::emptySet)
+                            .stream()
+                            .map(opt -> QuestionOption.builder().question(que)
+                                    .optionText(opt.optionText()).isCorrect(opt.isCorrect()).build())
+                            .collect(Collectors.toSet());
+                    que.setOptions(options);
 
-            return que;
-        }).collect(Collectors.toSet());
+                    return que;
+                }).collect(Collectors.toSet());
         quiz.setQuestions(questions);
 
+        return quizRepository.save(quiz);
+    }
+
+    @Override
+    public Quiz updateQuizStatus(UUID qid, QuizStatus status) {
+        Quiz quiz = getQuizById(qid);
+        quiz.setStatus(status);
         return quizRepository.save(quiz);
     }
 
@@ -137,42 +159,114 @@ public class QuizServiceImp implements QuizService {
         Quiz quiz = getQuizById(qid);
         quiz.setTitle(request.title());
         quiz.setDescription(request.description());
-        quiz.setCategory(request.category());
+
+        Category category = Optional.ofNullable(request.category().id()).map(id -> categoryService.getCategoryById(id))
+                .orElseGet(() -> {
+                    try {
+                        categoryService.getCategoryByName(request.category().name());
+                        throw new DuplicateResourceException("Category with given name already exists.");
+                    } catch (ResourceNotFoundException e) {
+                        // ? Proceed to create new category since no category found with given name
+                        return Category.builder().name(request.category().name())
+                                .description(request.category().description()).build();
+                    }
+                });
+        quiz.setCategory(category);
 
         QuizSettings settings = quiz.getSettings();
         settings.setDifficulty(request.settings().difficulty());
         settings.setPassingScore(request.settings().passingScore());
         settings.setMaxDuration(request.settings().maxDuration());
         settings.setMaxAttempts(request.settings().maxAttempts());
-        quiz.setSettings(settings);
 
-        Set<Question> updatedQuestions = request.questions().stream().map(reqQuestion -> {
-            Question question = questionRepository.findById(reqQuestion.id())
-                    .orElseThrow(() -> new ResourceNotFoundException("Question not found with Given ID."));
-            question.setQuestionText(reqQuestion.questionText());
-            question.setMarks(reqQuestion.marks());
-            question.setExplanation(reqQuestion.explanation());
-            question.setDifficulty(reqQuestion.difficulty());
+        if (quiz.getQuestions() == null) {
+            quiz.setQuestions(new HashSet<>());
+        }
 
-            Map<Long, UpdateOptionDto> newOptions = reqQuestion.options().stream()
-                    .collect(Collectors.toMap(UpdateOptionDto::id, o -> o, (existing, replacing) -> existing));
-            Set<QuestionOption> updatedOptions = question.getOptions().stream().map(opt -> {
+        // ? Map incoming questions by ID
+        Map<Long, UpdateQuestionDto> incomingQuestionsMap = Optional.ofNullable(request.questions())
+                .orElseGet(Collections::emptySet).stream()
+                .filter(q -> q.id() != null)
+                .collect(Collectors.toMap(UpdateQuestionDto::id, q -> q, (existing, replacing) -> existing));
 
-                if (newOptions.get(opt.getId()) != null) {
-                    opt.setOptionText(newOptions.get(opt.getId()).optionText());
-                    opt.setIsCorrect(newOptions.get(opt.getId()).isCorrect());
-                }
-                return opt;
+        // ? Remove questions omitted from request (Orphan Removal for Questions)
+        quiz.getQuestions().removeIf(q -> !incomingQuestionsMap.containsKey(q.getId()));
 
-            }).collect(Collectors.toSet());
-            question.setOptions(updatedOptions);
+        // ? Update existing questions in-place
+        quiz.getQuestions().forEach(question -> {
+            UpdateQuestionDto reqQuestion = incomingQuestionsMap.get(question.getId());
+            if (reqQuestion != null) {
+                question.setQuestionText(reqQuestion.questionText());
+                question.setMarks(reqQuestion.marks());
+                question.setExplanation(reqQuestion.explanation());
+                question.setDifficulty(reqQuestion.difficulty());
 
-            return question;
-        }).collect(Collectors.toSet());
-        quiz.setQuestions(updatedQuestions);
+                updateOptionsInPlace(question, reqQuestion.options());
+            }
+        });
+
+        // ? Add brand-new questions (null IDs)
+        Optional.ofNullable(request.questions())
+                .orElseGet(Collections::emptySet).stream()
+                .filter(q -> q.id() == null)
+                .forEach(reqQuestion -> {
+                    Question newQuestion = Question.builder()
+                            .questionText(reqQuestion.questionText())
+                            .marks(reqQuestion.marks())
+                            .explanation(reqQuestion.explanation())
+                            .difficulty(reqQuestion.difficulty())
+                            .quiz(quiz)
+                            .options(new HashSet<>())
+                            .build();
+
+                    updateOptionsInPlace(newQuestion, reqQuestion.options());
+                    quiz.getQuestions().add(newQuestion);
+                });
 
         return quizRepository.save(quiz);
+    }
 
+    private void updateOptionsInPlace(Question question, Set<UpdateOptionDto> incomingOptions) {
+        Map<Long, UpdateOptionDto> incomingUpdatedOptions = Optional.ofNullable(incomingOptions)
+                .orElseGet(Collections::emptySet).stream()
+                .filter(o -> o.id() != null)
+                .collect(Collectors.toMap(UpdateOptionDto::id, o -> o, (existing, replacing) -> existing));
+
+        if (question.getOptions() == null) {
+            question.setOptions(new HashSet<>());
+        }
+
+        // Remove deleted options
+        question.getOptions().removeIf(existingOpt -> !incomingUpdatedOptions.containsKey(existingOpt.getId()));
+
+        // Update modified options
+        question.getOptions().forEach(existingOpt -> {
+            UpdateOptionDto dto = incomingUpdatedOptions.get(existingOpt.getId());
+            if (dto != null) {
+                existingOpt.setOptionText(dto.optionText());
+                existingOpt.setIsCorrect(dto.isCorrect());
+            }
+        });
+
+        // Add new options
+        Optional.ofNullable(incomingOptions)
+                .orElseGet(Collections::emptySet).stream()
+                .filter(o -> o.id() == null)
+                .forEach(newDto -> {
+                    QuestionOption newOption = QuestionOption.builder()
+                            .optionText(newDto.optionText())
+                            .isCorrect(newDto.isCorrect())
+                            .question(question)
+                            .build();
+                    question.getOptions().add(newOption);
+                });
+    }
+
+    @Override
+    public Quiz deleteQuiz(UUID qid) {
+        Quiz quiz = getQuizById(qid);
+        quiz.setIsDeleted(true);
+        return quizRepository.save(quiz);
     }
 
 }

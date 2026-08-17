@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import com.qoap.quiz.exceptions.ResourceNotFoundException;
 import com.qoap.quiz.models.Category;
+import com.qoap.quiz.models.Quiz;
 import com.qoap.quiz.repositories.CategoryRepository;
 import com.qoap.quiz.repositories.QuizRepository;
 
@@ -32,7 +33,7 @@ public class CategoryService {
         return categoryRepository.findAll();
     }
 
-    public List<Category> getAllQuizzesByCategory(Long catId) {
+    public List<Quiz> getAllQuizzesByCategory(Long catId) {
         return quizRepository.findAllByCategory(Category.builder().id(catId).build());
     }
 

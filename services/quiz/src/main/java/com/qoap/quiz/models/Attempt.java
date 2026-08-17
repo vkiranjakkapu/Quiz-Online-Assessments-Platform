@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
 
+import org.hibernate.annotations.CreationTimestamp;
+
 import com.qoap.quiz.enums.CompletionStatus;
 
 import jakarta.persistence.CascadeType;
@@ -45,7 +47,7 @@ public class Attempt {
     private Quiz quiz;
 
     @Column(length = 3)
-    private Double score;
+    private Integer score;
 
     @Column(length = 5)
     private Double percentage;
@@ -65,7 +67,7 @@ public class Attempt {
     @Builder.Default
     private CompletionStatus status = CompletionStatus.IN_PROGRESS;
 
-    @Builder.Default
-    private LocalDateTime attemptTime = LocalDateTime.now();
+    @CreationTimestamp
+    private LocalDateTime attemptTime;
 
 }

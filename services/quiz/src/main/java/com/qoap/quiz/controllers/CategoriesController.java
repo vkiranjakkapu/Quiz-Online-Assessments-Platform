@@ -23,7 +23,7 @@ public class CategoriesController {
         return ResponseEntity.ok(APIResponseDto.builder().data(categoryService.getAllCategories()).build());
     }
 
-    @GetMapping("/{category}")
+    @GetMapping("/{catId}")
     public ResponseEntity<APIResponseDto> getAllQuizzesByCategories(@PathVariable Long catId) {
         return ResponseEntity.ok(APIResponseDto.builder().data(categoryService.getAllQuizzesByCategory(catId)).build());
     }

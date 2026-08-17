@@ -7,18 +7,16 @@ export default function AttemptDetails() {
 
     return (
         <SectionLayout
-            breadCrumbs={{
-                anchors: [
-                    {
-                        text: "Attempts",
-                        uri: RoutePaths.ATTEMPT,
-                    },
-                    {
-                        text: "Quiz - Quiz title",
-                        uri: RoutePaths.ATTEMPT_DETAILS,
-                    },
-                ],
-            }}
+            breadCrumbs={[
+                {
+                    text: "Attempts",
+                    uri: RoutePaths.QUIZ_ATTEMPT,
+                },
+                {
+                    text: "Quiz - Quiz title",
+                    uri: RoutePaths.ATTEMPT_DETAILS,
+                },
+            ]}
             description={`Attempt Details for ${attemptId}`}
         >
             <h1>Attempt Details</h1>

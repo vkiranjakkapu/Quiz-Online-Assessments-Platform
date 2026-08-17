@@ -5,7 +5,7 @@ import ActionButton, { type ActionButtonProps } from "./ActionButton";
 export type SectionLayoutProps = {
     children: ReactNode;
     title?: string;
-    breadCrumbs?: { anchors: { text: string; uri: string }[] };
+    breadCrumbs?: { text: string; uri: string }[];
     description?: string;
     actionButtons?: ActionButtonProps[];
 };
@@ -20,7 +20,7 @@ export default function SectionLayout({
     const navigate = useNavigate();
 
     return (
-        <section className="rounded-lg shadow-sm bg-slate-100 dark:bg-gray-800 dark:text-white">
+        <section className="rounded-lg shadow-sm bg-slate-50 dark:bg-gray-800 dark:text-white">
             <div className="p-6 space-y-4">
                 {(title || breadCrumbs || description) && (
                     <>
@@ -28,42 +28,36 @@ export default function SectionLayout({
                             <div>
                                 <h3 className="text-secondary dark:text-slate-50 font-semibold">
                                     {breadCrumbs
-                                        ? breadCrumbs.anchors.map(
-                                              (path, idx) => {
-                                                  const isLast =
-                                                      idx ===
-                                                      breadCrumbs.anchors
-                                                          .length -
-                                                          1;
-                                                  return (
-                                                      <a
-                                                          key={idx}
-                                                          onClick={() => {
-                                                              navigate(
-                                                                  path.uri,
-                                                              );
-                                                          }}
-                                                          className={`text-secondary cursor-pointer transition-colors duration-75 capitalize ${
-                                                              isLast
-                                                                  ? "text-slate-500 dark:text-slate-100 pointer-events-none"
-                                                                  : "font-semibold hover:text-secondary dark:hover:text-secondary"
-                                                          }`}
-                                                          aria-current={
-                                                              isLast
-                                                                  ? "page"
-                                                                  : undefined
-                                                          }
-                                                      >
-                                                          {path.text}
-                                                          {!isLast && (
-                                                              <span className="text-slate-400 dark:text-white mx-1 select-none">
-                                                                  /
-                                                              </span>
-                                                          )}
-                                                      </a>
-                                                  );
-                                              },
-                                          )
+                                        ? breadCrumbs.map((path, idx) => {
+                                              const isLast =
+                                                  idx ===
+                                                  breadCrumbs.length - 1;
+                                              return (
+                                                  <a
+                                                      key={idx}
+                                                      onClick={() => {
+                                                          navigate(path.uri);
+                                                      }}
+                                                      className={`text-secondary cursor-pointer transition-colors duration-75 capitalize ${
+                                                          isLast
+                                                              ? "text-slate-500 dark:text-slate-100 pointer-events-none"
+                                                              : "font-semibold hover:text-secondary dark:hover:text-secondary"
+                                                      }`}
+                                                      aria-current={
+                                                          isLast
+                                                              ? "page"
+                                                              : undefined
+                                                      }
+                                                  >
+                                                      {path.text}
+                                                      {!isLast && (
+                                                          <span className="text-slate-400 dark:text-white mx-1 select-none">
+                                                              /
+                                                          </span>
+                                                      )}
+                                                  </a>
+                                              );
+                                          })
                                         : title}
                                 </h3>
                                 {description && (
@@ -105,7 +99,7 @@ export default function SectionLayout({
                                 </div>
                             )}
                         </div>
-                        <hr className="mt-2 w-full border-slate-300 dark:border-slate-600" />
+                        <hr className="w-full border-slate-300 dark:border-slate-600" />
                     </>
                 )}
                 <div>{children}</div>

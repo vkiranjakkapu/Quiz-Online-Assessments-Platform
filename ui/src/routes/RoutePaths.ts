@@ -1,6 +1,6 @@
 export const RoutePaths = {
     LANDING: "/",
-    
+
     DASHBOARD: "/dashboard",
     PROFILE: "/profile",
 
@@ -9,7 +9,8 @@ export const RoutePaths = {
 
     QUIZZES: "/quizzes",
     QUIZ_DETAILS: "/quizzes/:quizId",
+    QUIZ_ATTEMPT: "/quizzes/attempt/:quizId",
 
-    ATTEMPT: "/attempt",
-    ATTEMPT_DETAILS: "/attempt/:attemptId",
+    ATTEMPTS: "/attempts",
+    ATTEMPT_DETAILS: "/attempts/:attemptId",
 } as const;

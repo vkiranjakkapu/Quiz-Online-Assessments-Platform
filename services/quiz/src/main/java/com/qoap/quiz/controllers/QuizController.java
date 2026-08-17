@@ -5,7 +5,9 @@ import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.qoap.quiz.dto.APIResponseDto;
 import com.qoap.quiz.dto.CreateQuizRequestDto;
 import com.qoap.quiz.dto.UpdateQuizRequestDto;
+import com.qoap.quiz.dto.UpdateQuizStatusDto;
 import com.qoap.quiz.services.QuizService;
 
 import lombok.RequiredArgsConstructor;
@@ -32,21 +35,14 @@ public class QuizController {
         return ResponseEntity.ok().body(APIResponseDto.builder().data(quizService.getAllQuizzes()).build());
     }
 
-    @GetMapping("/monthly")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<APIResponseDto> getAllQuizzesPerDayThisMonth() {
-        return ResponseEntity.ok().body(APIResponseDto.builder().data(quizService.getAllQuizzesPerDayInMonth()).build());
-    }
-
-    @GetMapping("/monthly/{month}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<APIResponseDto> getAllQuizzesPerDayInGivenMonth(@PathVariable YearMonth month) {
-        return ResponseEntity.ok().body(APIResponseDto.builder().data(quizService.getAllQuizzesPerDayInMonth(month)).build());
-    }
-
     @GetMapping("/{quizId}")
     public ResponseEntity<APIResponseDto> getQuizById(@PathVariable UUID quizId) {
         return ResponseEntity.ok().body(APIResponseDto.builder().data(quizService.getQuizById(quizId)).build());
+    }
+
+    @GetMapping("/title/{title}")
+    public ResponseEntity<APIResponseDto> getAllQuizzesByTitle(@PathVariable String title) {
+        return ResponseEntity.ok().body(APIResponseDto.builder().data(quizService.getAllQuizzesByTitle(title)).build());
     }
 
     @PostMapping("/")
@@ -57,7 +53,34 @@ public class QuizController {
     @PutMapping("/{quizId}")
     public ResponseEntity<APIResponseDto> updateQuiz(@PathVariable UUID quizId,
             @RequestBody UpdateQuizRequestDto quiz) {
-        return ResponseEntity.ok().body(APIResponseDto.builder().data(null).build());
+        return ResponseEntity.ok().body(APIResponseDto.builder().data(quizService.updateQuiz(quizId, quiz)).build());
+    }
+
+    @PatchMapping("/{quizId}")
+    public ResponseEntity<APIResponseDto> updateQuizStatus(@PathVariable UUID quizId,
+            @RequestBody UpdateQuizStatusDto request) {
+        return ResponseEntity.ok()
+                .body(APIResponseDto.builder().data(quizService.updateQuizStatus(quizId, request.status())).build());
+    }
+
+    @DeleteMapping("/{quizId}")
+    public ResponseEntity<APIResponseDto> deleteQuiz(@PathVariable UUID quizId) {
+        return ResponseEntity.ok()
+                .body(APIResponseDto.builder().data(quizService.deleteQuiz(quizId)).build());
+    }
+
+    @GetMapping("/monthly")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<APIResponseDto> getAllQuizzesPerDayThisMonth() {
+        return ResponseEntity.ok()
+                .body(APIResponseDto.builder().data(quizService.getAllQuizzesPerDayInMonth()).build());
+    }
+
+    @GetMapping("/monthly/{month}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<APIResponseDto> getAllQuizzesPerDayInGivenMonth(@PathVariable YearMonth month) {
+        return ResponseEntity.ok()
+                .body(APIResponseDto.builder().data(quizService.getAllQuizzesPerDayInMonth(month)).build());
     }
 
 }

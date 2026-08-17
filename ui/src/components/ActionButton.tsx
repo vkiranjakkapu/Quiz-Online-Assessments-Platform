@@ -53,3 +53,46 @@ export default function ActionButton({
         </button>
     );
 }
+
+export type ActionButtonGroupProps = {
+    actionButtons: ActionButtonProps[];
+    padding?: string;
+};
+
+export function ActionButtonGroup({
+    actionButtons,
+    padding,
+}: ActionButtonGroupProps) {
+    return (
+        <div
+            className="inline-flex flex-col rounded-lg shadow-sm outline-1 outline-offset-2 outline-primary md:flex-row"
+            role="group"
+        >
+            {actionButtons?.map((btn, idx) => {
+                const isFirst = idx === 0;
+                const isLast = idx === actionButtons!.length - 1;
+                const roundedClass =
+                    isFirst && isLast
+                        ? "rounded-lg"
+                        : isFirst
+                          ? actionButtons.length == 2
+                              ? "border-e border-primary rounded-t-lg md:rounded-s-lg md:rounded-tr-none"
+                              : "rounded-t-lg md:rounded-s-lg md:rounded-tr-none"
+                          : isLast
+                            ? "rounded-b-lg md:rounded-e-lg md:rounded-bl-none"
+                            : "border-s border-e border-primary";
+                return (
+                    <ActionButton
+                        text={btn.text}
+                        icon={btn.icon}
+                        onClick={btn.onClick}
+                        key={idx}
+                        theme={btn.theme}
+                        padding={`${roundedClass} ${padding ?? "px-1.5 py-1"}`}
+                        resetStyles=""
+                    />
+                );
+            })}
+        </div>
+    );
+}
