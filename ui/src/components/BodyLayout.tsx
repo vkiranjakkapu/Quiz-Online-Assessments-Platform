@@ -15,7 +15,7 @@ export default function BodyLayout({ children }: BodyLayoutProps) {
     };
 
     return (
-        <main className="relative min-h-screen bg-slate-200 dark:bg-gray-900 text-slate-600 dark:text-slate-50">
+        <main className="relative h-screen overflow-scroll bg-slate-200 dark:bg-gray-900 text-slate-600 dark:text-slate-50">
             <Navbar
                 handleLoginClick={handleLogin}
                 handleRegisterClick={handleRegister}

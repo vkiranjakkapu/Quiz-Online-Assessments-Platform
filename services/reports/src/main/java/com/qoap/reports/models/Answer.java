@@ -1,5 +1,7 @@
 package com.qoap.reports.models;
 
+import java.time.LocalDateTime;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -22,5 +24,9 @@ public class Answer {
     private QuestionOption selectedOption;
 
     private Boolean isCorrect;
+
+    private LocalDateTime updatedAt;
+
+    private LocalDateTime createdAt;
 
 }

@@ -17,6 +17,7 @@ defaults.plugins.title.color = "#6b855d";
 export default function AdminDashBoard() {
     const [loading, setLoading] = useState(true);
     const [allReports, setAllReports] = useState<MonthlyQuizzesReport[]>([]);
+    const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
     const [monthlyReports, setMonthlyReports] = useState<
         MonthlyQuizzesReport[] | null
     >(null);
@@ -29,6 +30,7 @@ export default function AdminDashBoard() {
                         setMonthlyReports(resp);
                     } else {
                         setAllReports(resp);
+                        setMonthlyReports(resp);
                     }
                 } else {
                     console.log(resp);
@@ -43,18 +45,18 @@ export default function AdminDashBoard() {
     }, []);
 
     useEffect(() => {
-        fetchMonthlyQuizReports();
-    }, [fetchMonthlyQuizReports]);
+        fetchMonthlyQuizReports(selectedMonth ?? "");
+    }, [fetchMonthlyQuizReports, selectedMonth]);
 
-    const handleMonthChange = (selectedMonth: string) => {
-        setLoading(true);
-        if (!selectedMonth) {
-            setMonthlyReports(allReports);
-            setLoading(false);
-        } else {
-            fetchMonthlyQuizReports(selectedMonth);
-        }
-    };
+    // const handleMonthChange = (selectedMonth: string) => {
+    //     setLoading(true);
+    //     if (!selectedMonth) {
+    //         setMonthlyReports(allReports);
+    //         setLoading(false);
+    //     } else {
+    //         fetchMonthlyQuizReports(selectedMonth);
+    //     }
+    // };
 
     return (
         <>
@@ -70,12 +72,11 @@ export default function AdminDashBoard() {
                             type="month"
                             name="month"
                             id="month"
-                            onChange={(e) => handleMonthChange(e.target.value)}
+                            onChange={(e) => setSelectedMonth(e.target.value)}
                             className="py-1.5 px-2 rounded text-slate-700 bg-slate-200 dark:bg-slate-700 dark:text-white border border-slate-300 dark:border-slate-600"
                         />
                         <hr className="border border-slate-300 dark:border-slate-700" />
-                    </div>
-                    <div className="bg-slate-50 shadow-sm p-3 rounded-lg hidden">
+                    <div className="bg-slate-50 shadow-sm p-3 min-h-60 rounded-lg">
                         <Line
                             data={{
                                 labels: monthlyReports?.map(
@@ -113,6 +114,7 @@ export default function AdminDashBoard() {
                                 },
                             }}
                         />
+                    </div>
                     </div>
                 </>
             ) : (

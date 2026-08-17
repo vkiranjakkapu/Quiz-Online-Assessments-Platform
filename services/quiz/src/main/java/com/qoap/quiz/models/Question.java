@@ -3,11 +3,15 @@ package com.qoap.quiz.models;
 import java.time.LocalDateTime;
 import java.util.Set;
 
+import org.hibernate.annotations.CreationTimestamp;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.qoap.quiz.enums.QuizDifficulty;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -45,11 +49,13 @@ public class Question {
 
     private String explanation;
 
+    @Enumerated(EnumType.STRING)
     private QuizDifficulty difficulty;
 
-    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<QuestionOption> options;
 
+    @CreationTimestamp
     private LocalDateTime createdAt;
 
 }

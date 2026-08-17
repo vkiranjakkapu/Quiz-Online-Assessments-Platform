@@ -1,11 +1,14 @@
 import type { AxiosInstance, InternalAxiosRequestConfig } from "axios";
 import TokenStorage from "../storage/TokenStorage";
 
-
 export default function configureRequestInterceptor(api: AxiosInstance) {
     api.interceptors.request.use(
         (config: InternalAxiosRequestConfig) => {
+            const PUBLIC_ENDPOINTS = ["/auth/"];
 
+            if (PUBLIC_ENDPOINTS.some((path) => config.url?.includes(path))) {
+                return config;
+            }
             const accessToken = TokenStorage.getAccessToken();
 
             if (accessToken) {

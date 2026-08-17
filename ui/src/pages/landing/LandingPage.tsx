@@ -70,7 +70,7 @@ export default function LandingPage() {
                                 </h1>
                             </div>
                         </div>
-                        <div className="p-5 md:p-6 order-2 md:order-1 flex flex-col gap-3">
+                        <div className="p-5 md:p-6 order-2 md:order-1 flex flex-col gap-2">
                             <h1 className="inline-flex items-center gap-1">
                                 <LockClosedIcon className="size-5" />
                                 <span>SignIn</span>
@@ -85,7 +85,7 @@ export default function LandingPage() {
                             <span className="capitalize">email</span>
                             <input
                                 onChange={(e) => setEmail(e.target.value)}
-                                className="py-1 px-2 w-full rounded-full border border-slate-300 dark:border-slate-700 outline outline-slate-300 outline-offset-1 dark:outline-slate-600"
+                                className="py-1 px-2 w-full rounded-full border border-slate-300 dark:border-slate-700 outline outline-slate-50 outline-offset-2 dark:outline-slate-600"
                                 placeholder="email"
                                 type="email"
                                 name="email"
@@ -95,7 +95,7 @@ export default function LandingPage() {
                             <span className="capitalize">password</span>
                             <input
                                 onChange={(e) => setPassword(e.target.value)}
-                                className="py-1 px-2 w-full rounded-full border border-slate-300 dark:border-slate-700 outline outline-slate-300 outline-offset-1 dark:outline-slate-600"
+                                className="py-1 px-2 w-full rounded-full border border-slate-300 dark:border-slate-700 outline outline-slate-50 outline-offset-2 dark:outline-slate-600"
                                 placeholder="password"
                                 type="password"
                                 name="password"
@@ -106,6 +106,7 @@ export default function LandingPage() {
                             <ActionButton
                                 type="button"
                                 text={loading ? "Signing In..." : "Sign In"}
+                                theme="primary"
                                 onClick={handleLogin}
                                 disabled={loading || !password || !email}
                                 icon={loading ? LockOpenIcon : LockClosedIcon}

@@ -47,19 +47,22 @@ public class Quiz {
     @Column(length = 400, nullable = false)
     private String description;
 
-    @ManyToOne
+    @ManyToOne(cascade = { CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH })
     @JoinColumn(name = "category_id")
     private Category category;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private QuizSettings settings;
 
-    @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Question> questions;
 
     @Builder.Default
     @Enumerated(EnumType.STRING)
     private QuizStatus status = QuizStatus.DRAFT;
+
+    @Builder.Default
+    private Boolean isDeleted = false;
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;

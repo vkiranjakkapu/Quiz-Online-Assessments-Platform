@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import com.qoap.quiz.models.Category;
 import com.qoap.quiz.models.Quiz;
 
 public interface QuizRepository extends JpaRepository<Quiz, UUID> {
@@ -16,5 +17,7 @@ public interface QuizRepository extends JpaRepository<Quiz, UUID> {
     List<Quiz> searchByTitleFts(@Param("searchTerm") String searchTerm);
 
     List<Quiz> findAllByCreatedAtBetween(LocalDateTime start, LocalDateTime end);
+
+    List<Quiz> findAllByCategory(Category category);
 
 }
