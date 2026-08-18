@@ -48,7 +48,7 @@ export function InputComponent({
                 </label>
             )}
             <input
-                className={`px-1.5 text-slate-700 dark:text-slate-200 dark:bg-slate-900/50 ${customize}`}
+                className={`px-1.5 text-slate-700 dark:text-slate-200 dark:bg-slate-900/50 w-full dark:disabled:opacity-40 disabled:opacity-80 disabled:cursor-not-allowed ${customize}`}
                 id={id}
                 {...props}
             />

@@ -47,7 +47,7 @@ export function TextAreaComponent({
                 </label>
             )}
             <textarea
-                className={`px-1.5 text-slate-700 dark:text-slate-200 bg-slate-50 dark:bg-slate-800/50 ${customize}`}
+                className={`px-1.5 text-slate-700 dark:text-slate-200 dark:bg-slate-900/50 ${customize}`}
                 id={id}
                 {...props}
             />

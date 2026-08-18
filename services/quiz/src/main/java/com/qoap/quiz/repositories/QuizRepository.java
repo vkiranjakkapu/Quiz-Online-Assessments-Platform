@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import com.qoap.quiz.enums.QuizStatus;
 import com.qoap.quiz.models.Category;
 import com.qoap.quiz.models.Quiz;
 
@@ -19,5 +20,7 @@ public interface QuizRepository extends JpaRepository<Quiz, UUID> {
     List<Quiz> findAllByCreatedAtBetween(LocalDateTime start, LocalDateTime end);
 
     List<Quiz> findAllByCategory(Category category);
+
+    List<Quiz> findAllByStatus(QuizStatus published);
 
 }

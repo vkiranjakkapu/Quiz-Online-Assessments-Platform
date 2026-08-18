@@ -3,7 +3,7 @@ import type {
     ForwardRefExoticComponent,
     MouseEvent,
     PropsWithoutRef,
-    SVGProps,
+    SVGProps
 } from "react";
 
 export interface ActionButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -19,6 +19,12 @@ export interface ActionButtonProps extends ButtonHTMLAttributes<HTMLButtonElemen
     resetStyles?: string;
     padding?: string;
     onClick?: (e: MouseEvent<HTMLButtonElement>) => void;
+}
+export interface WithParamActionButtonProps extends Omit<
+    ActionButtonProps,
+    "onClick"
+> {
+    onClick: (id: string) => void;
 }
 
 export default function ActionButton({
@@ -47,9 +53,9 @@ export default function ActionButton({
                 transition-colors duration-75`}
             {...props}
         >
-            {!iconAfter && Icon && <Icon className="size-4.5" />}
+            {!iconAfter && Icon && <Icon className="size-4" />}
             {text}
-            {iconAfter && Icon && <Icon className="size-4.5" />}
+            {iconAfter && Icon && <Icon className="size-4" />}
         </button>
     );
 }

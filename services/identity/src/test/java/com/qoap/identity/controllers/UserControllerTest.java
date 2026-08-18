@@ -49,8 +49,8 @@ class UserControllerTest {
 	@Autowired
 	private MockMvc mockMvc;
 
-    @Autowired
-    private JsonMapper jsonMapper;
+	@Autowired
+	private JsonMapper jsonMapper;
 
 	@MockitoBean
 	private UserService userService;
@@ -184,6 +184,8 @@ class UserControllerTest {
 		UpdateUserRequest request = new UpdateUserRequest(
 				"",
 				"",
+				"",
+				UserGender.NON_DISCLOSED,
 				null,
 				null,
 				true);
@@ -220,6 +222,8 @@ class UserControllerTest {
 				"John",
 				"Doe",
 				"8888888888",
+				UserGender.NON_DISCLOSED,
+				null,
 				AddressDto.builder()
 						.street("New Street")
 						.pinCode("534237")

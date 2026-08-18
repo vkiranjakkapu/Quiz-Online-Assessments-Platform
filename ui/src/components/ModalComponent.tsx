@@ -5,7 +5,7 @@ import React, {
     type SVGProps,
 } from "react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
-import ActionButton from "./ActionButton";
+import ActionButton from "./button/ActionButton";
 
 interface ModalProps {
     isOpen: boolean;

@@ -5,7 +5,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import ActionButton from "../../components/ActionButton";
+import ActionButton from "../../components/button/ActionButton";
 import LoadingPortalComponent from "../../components/LoadingPortalComponent";
 import SectionLayout from "../../components/SectionLayout";
 import usePrincipal, { AuthStatus } from "../../context/usePrincipal";
