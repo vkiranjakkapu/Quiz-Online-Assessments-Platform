@@ -24,6 +24,13 @@ class AccountService {
             uri: "/me",
         });
     }
+    async getUserById<T>(userId: string): Promise<T | ErrorResponse> {
+        return apiClient({
+            type: "get",
+            service: "profile",
+            uri: "/" + userId,
+        });
+    }
 
     async getAllUsers<T>(role?: RoleType): Promise<T | ErrorResponse> {
         return apiClient({
@@ -33,7 +40,7 @@ class AccountService {
         });
     }
 
-    async createUser<T>(payload: object): Promise<T | ErrorResponse> {
+    async createUser<T>(payload: unknown): Promise<T | ErrorResponse> {
         return apiClient({
             type: "post",
             service: "profile",
@@ -44,12 +51,23 @@ class AccountService {
 
     async updateProfile<T>(
         id: string,
-        payload: object,
+        payload: unknown,
     ): Promise<T | ErrorResponse> {
         return apiClient({
             type: "put",
             service: "profile",
             uri: "/" + id,
+            payload,
+        });
+    }
+
+    async changePassword<T>(
+        payload: unknown,
+    ): Promise<T | ErrorResponse> {
+        return apiClient({
+            type: "patch",
+            service: "profile",
+            uri: "/",
             payload,
         });
     }

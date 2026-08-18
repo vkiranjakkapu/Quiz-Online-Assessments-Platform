@@ -10,12 +10,12 @@ import {
 } from "@heroicons/react/24/outline";
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ActionButtonGroup } from "../../components/ActionButton";
+import { ActionButtonGroup } from "../../components/button/ActionButton";
 import { renderCellValue } from "../../components/Helper";
-import QuizCard from "../../components/QuizCard";
 import SectionLayout from "../../components/SectionLayout";
 import { RoutePaths } from "../../routes/RoutePaths";
 import QuizService, { QuizStatus, type Quiz } from "../../services/QuizService";
+import QuizCard from "./QuizCard";
 
 export default function QuizDetails() {
     const { quizId } = useParams<{ quizId: string }>();
@@ -86,11 +86,11 @@ export default function QuizDetails() {
             description={`Details about this quiz below`}
         >
             <div className="container">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-x-3">
+                <div className="grid grid-cols-1 md:grid-cols-7 gap-3">
                     <div
-                        className={`col-span-full ${similarQuizzes.length == 0 ? "col-span-full" : "md:col-span-3"}`}
+                        className={`col-span-full ${similarQuizzes.length == 0 ? "col-span-full" : "md:col-span-4 lg:col-span-5"}`}
                     >
-                        <div className="dark:bg-slate-800 shadow-sm w-4/5 mx-auto p-4 rounded-lg border border-slate-200 dark:border-slate-700 space-y-3">
+                        <div className="dark:bg-slate-800 shadow-sm w-full lg:w-4/5 mx-auto p-4 rounded-lg border border-slate-200 dark:border-slate-700 space-y-3">
                             {loading ? (
                                 <div className="inline-flex justify-center items-center w-full gap-3">
                                     <div className="h-5 w-5 rounded-full border-2 border-t-primary border-slate-300 animate-spin"></div>
@@ -227,7 +227,7 @@ export default function QuizDetails() {
                     </div>
                     {/* Similar Quizzes */}
                     {similarQuizzes.length > 0 && (
-                        <div className="col-span-full md:col-span-1 rounded relative max-h-[70vh] overflow-scroll border border-slate-200 dark:border-slate-700 shadow-sm">
+                        <div className="col-span-full md:col-span-3 lg:col-span-2 rounded relative max-h-[70vh] overflow-scroll border border-slate-200 dark:border-slate-700 shadow-sm">
                             <div className="sticky top-0 z-10 bg-slate-100 dark:bg-slate-700 p-2 shadow-sm">
                                 <h1 className="font-semibold text-secondary dark:text-slate-100">
                                     Similar quizzes

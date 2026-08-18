@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
-import ActionButton, { type ActionButtonProps } from "./ActionButton";
+import ActionButton, { type ActionButtonProps } from "./button/ActionButton";
 
 export type SectionLayoutProps = {
     children: ReactNode;

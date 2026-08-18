@@ -3,7 +3,7 @@ export const RoutePaths = {
 
     DASHBOARD: "/dashboard",
     PROFILE: "/profile",
-
+    
     USERS: "/users",
     USER_DETAILS: "/users/:userId",
 

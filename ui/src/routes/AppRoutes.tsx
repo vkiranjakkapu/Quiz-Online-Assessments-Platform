@@ -10,7 +10,6 @@ import QuizDetails from "../pages/quiz/QuizDetails";
 import AttemptDetails from "../pages/attempts/AttemptDetails";
 import AttemptQuiz from "../pages/attempts/AttemptQuiz";
 import Users from "../pages/users/Users";
-import UserDetails from "../pages/users/UserDetails";
 import Profile from "../pages/profile/Profile";
 import Attempts from "../pages/attempts/Attempts";
 
@@ -35,7 +34,10 @@ export default function AppRoutes() {
                     path={RoutePaths.QUIZ_DETAILS}
                     element={<QuizDetails />}
                 ></Route>
-                <Route path={RoutePaths.QUIZ_ATTEMPT} element={<AttemptQuiz />}></Route>
+                <Route
+                    path={RoutePaths.QUIZ_ATTEMPT}
+                    element={<AttemptQuiz />}
+                ></Route>
 
                 <Route
                     path={RoutePaths.ATTEMPTS}
@@ -50,7 +52,7 @@ export default function AppRoutes() {
                     <Route path={RoutePaths.USERS} element={<Users />} />
                     <Route
                         path={RoutePaths.USER_DETAILS}
-                        element={<UserDetails />}
+                        element={<Profile />}
                     />
                 </Route>
             </Route>

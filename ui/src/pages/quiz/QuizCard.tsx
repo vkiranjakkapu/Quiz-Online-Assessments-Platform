@@ -6,9 +6,9 @@ import {
     TrashIcon,
 } from "@heroicons/react/24/outline";
 import type { ReactNode } from "react";
-import usePrincipal from "../context/usePrincipal";
-import { QuizStatus, type Quiz } from "../services/QuizService";
-import ActionButton from "./ActionButton";
+import { QuizStatus, type Quiz } from "../../services/QuizService";
+import usePrincipal from "../../context/usePrincipal";
+import ActionButton from "../../components/button/ActionButton";
 
 export type QuizCardProps = {
     quiz: Quiz;
@@ -52,7 +52,7 @@ export default function QuizCard({
                     <span className="text-start">
                         No.Of Qs - {quiz.questions?.length}
                     </span>
-                    <span>|</span>
+                    <span className="hidden md:block">|</span>
                     <span className="text-end">
                         Duration {quiz.settings?.maxDuration?.substring(2)}
                     </span>
@@ -99,19 +99,17 @@ export default function QuizCard({
                         )}
                     </div>
                 )}
-                {isAdmin() && (
-                    <div className="inline-flex rounded-lg overflow-hidden outline outline-primary outline-offset-2">
-                        <ActionButton
-                            icon={InformationCircleIcon}
-                            text="Details"
-                            theme="primary"
-                            onClick={() => {
-                                handleAttempt(quiz.id ?? "");
-                            }}
-                            resetStyles="text-sm"
-                        />
-                    </div>
-                )}
+                <div className="inline-flex rounded-lg overflow-hidden outline outline-primary outline-offset-2">
+                    <ActionButton
+                        icon={InformationCircleIcon}
+                        text="Details"
+                        theme="primary"
+                        onClick={() => {
+                            handleAttempt(quiz.id ?? "");
+                        }}
+                        resetStyles="text-sm"
+                    />
+                </div>
             </div>
         </div>
     );

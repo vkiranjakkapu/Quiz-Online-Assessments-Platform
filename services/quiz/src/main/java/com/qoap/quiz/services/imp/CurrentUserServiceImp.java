@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.labmantix.platform.security.context.AuthenticationContext;
 import com.labmantix.platform.security.model.AuthenticatedUser;
+import com.qoap.quiz.enums.RoleType;
 import com.qoap.quiz.services.CurrentUserService;
 
 import jakarta.ws.rs.ForbiddenException;
@@ -46,17 +47,12 @@ public class CurrentUserServiceImp implements CurrentUserService {
 
     @Override
     public boolean isAdmin() {
-        return currentUser().getAuthorities().contains("ROLE_ADMIN");
+        return currentUser().getAuthorities().contains("ROLE_" + RoleType.ADMIN);
     }
 
     @Override
-    public boolean isAgent() {
-        return currentUser().getAuthorities().contains("ROLE_AGENT");
-    }
-
-    @Override
-    public boolean isCustomer() {
-        return currentUser().getAuthorities().contains("ROLE_CUSTOMER");
+    public boolean isStudent() {
+        return currentUser().getAuthorities().contains("ROLE_" + RoleType.STUDENT);
     }
 
 }

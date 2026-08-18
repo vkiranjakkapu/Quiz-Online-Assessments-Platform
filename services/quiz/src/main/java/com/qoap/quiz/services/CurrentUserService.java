@@ -19,8 +19,6 @@ public interface CurrentUserService {
 
     boolean isAdmin();
 
-    boolean isAgent();
-
-    boolean isCustomer();
+    boolean isStudent();
 
 }

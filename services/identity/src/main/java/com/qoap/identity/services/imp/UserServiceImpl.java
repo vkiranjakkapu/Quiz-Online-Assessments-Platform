@@ -145,7 +145,8 @@ public class UserServiceImpl implements UserService {
 		address.setId(user.getAddress().getId());
 		address.setDeleted(false);
 		user.setAddress(address);
-		user.setDob(user.getDob());
+		user.setDob(request.dob());
+		user.setGender(request.gender());
 		user.setEnabled(request.enabled());
 
 		return mapToResponse(userRepository.save(user));

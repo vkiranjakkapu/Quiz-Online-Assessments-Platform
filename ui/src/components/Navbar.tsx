@@ -16,7 +16,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import usePrincipal from "../context/usePrincipal";
 import { RoutePaths } from "../routes/RoutePaths";
-import ActionButton from "./ActionButton";
+import ActionButton from "./button/ActionButton";
 import Logo from "/logo.png";
 import UserDP from "/undraw_choose_5kz4.svg";
 import useProfile from "../context/useProfile";

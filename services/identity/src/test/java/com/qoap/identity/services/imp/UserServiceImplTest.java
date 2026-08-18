@@ -242,7 +242,7 @@ class UserServiceImplTest {
 	void getAllUsers_ShouldReturnUsers() {
 
 		when(userRepository.findAllByDeletedFalse())
-        .thenReturn(List.of(admin));
+				.thenReturn(List.of(admin));
 
 		List<UserResponse> users = userService.getAllUsers();
 
@@ -326,6 +326,8 @@ class UserServiceImplTest {
 				"Updated",
 				"User",
 				"8888888888",
+				UserGender.NON_DISCLOSED,
+				null,
 				addressDto,
 				true);
 
@@ -351,6 +353,8 @@ class UserServiceImplTest {
 				"Updated",
 				"User",
 				"9999999999",
+				UserGender.NON_DISCLOSED,
+				null,
 				addressDto,
 				true);
 

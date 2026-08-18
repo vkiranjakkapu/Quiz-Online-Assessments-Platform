@@ -30,7 +30,7 @@ import {
     type SubmitEvent,
 } from "react";
 import { useNavigate } from "react-router-dom";
-import ActionButton from "../../components/ActionButton";
+import ActionButton from "../../components/button/ActionButton";
 import { InputComponent } from "../../components/form/InputComponent";
 import {
     SelectComponent,
@@ -41,7 +41,7 @@ import { renderCellValue } from "../../components/Helper";
 import ModalComponent from "../../components/ModalComponent";
 import type { NotificationProps } from "../../components/Notification";
 import Notification from "../../components/Notification";
-import QuizCard from "../../components/QuizCard";
+import usePagination from "../../components/pagination/usePagination";
 import SectionLayout from "../../components/SectionLayout";
 import usePrincipal from "../../context/usePrincipal";
 import { RoutePaths } from "../../routes/RoutePaths";
@@ -54,8 +54,9 @@ import QuizService, {
     type QuestionOption,
     type Quiz,
 } from "../../services/QuizService";
+import QuizCard from "./QuizCard";
 
-export type AllNotifications = {
+type AllNotifications = {
     form: NotificationProps;
     questions: NotificationProps;
 };
@@ -559,6 +560,14 @@ export default function Quizzes() {
         }));
     };
 
+    const {
+        currentPage,
+        totalPages,
+        currentItems: currentQuizzes,
+        goToNextPage,
+        goToPrevPage,
+    } = usePagination(filteredQuizzes, 8);
+
     return (
         <SectionLayout
             title="Quizzes"
@@ -581,7 +590,11 @@ export default function Quizzes() {
                 icon={SquaresPlusIcon}
                 title="Create Quiz"
                 isOpen={modalState}
-                onClose={() => toggleModalState(!modalState)}
+                onClose={() => {
+                    toggleModalState(!modalState);
+                    setSelectedQuiz(null);
+                    updateNotifications(null);
+                }}
                 maxWidthClass="max-w-6xl"
             >
                 <form
@@ -747,7 +760,7 @@ export default function Quizzes() {
                                             selectedQuiz?.category
                                                 ?.description ?? ""
                                         }
-                                        customize="w-full"
+                                        customize="w-full "
                                         placeholder="Category Description"
                                         required
                                     />
@@ -1494,15 +1507,20 @@ export default function Quizzes() {
                                             icon={ChevronLeftIcon}
                                             resetStyles="text-white bg-primary hover:bg-primary/60 transition-colors duration-75"
                                             padding="p-1"
+                                            onClick={goToPrevPage}
+                                            disabled={currentPage == 1}
                                         />
                                         <ActionButton
                                             icon={ChevronRightIcon}
                                             resetStyles="text-white bg-primary hover:bg-primary/60 transition-colors duration-75"
                                             padding="p-1"
+                                            onClick={goToNextPage}
+                                            disabled={totalPages == currentPage}
                                         />
                                     </div>
                                     <span className="block lowercase text-sm">
-                                        Showing page 1 of 2
+                                        Showing page {currentPage} of{" "}
+                                        {totalPages}
                                     </span>
                                 </div>
                             </div>
@@ -1510,14 +1528,14 @@ export default function Quizzes() {
                         <hr className="w-full border-slate-300 dark:border-slate-600" />
 
                         {/* Quiz Cards */}
-                        {filteredQuizzes.length == 0 ? (
+                        {currentQuizzes.length == 0 ? (
                             <div className="capitalize text-sm inline-flex gap-1 items-center">
                                 <ClockIcon className="size-4" />
                                 <span>No quizzes found with given search</span>
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                                {filteredQuizzes.map((quiz, idx) => (
+                                {currentQuizzes.map((quiz, idx) => (
                                     <QuizCard
                                         key={idx}
                                         quiz={quiz}

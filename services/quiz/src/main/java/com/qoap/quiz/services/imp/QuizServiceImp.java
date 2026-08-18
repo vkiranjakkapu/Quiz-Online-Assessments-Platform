@@ -39,6 +39,7 @@ public class QuizServiceImp implements QuizService {
 
     private final QuizRepository quizRepository;
     private final CategoryService categoryService;
+    private final CurrentUserServiceImp currentUser;
 
     @Override
     @Transactional(readOnly = true)
@@ -50,6 +51,10 @@ public class QuizServiceImp implements QuizService {
     @Override
     @Transactional(readOnly = true)
     public List<Quiz> getAllQuizzes() {
+        if (currentUser.isStudent()) {
+            return quizRepository.findAllByStatus(QuizStatus.PUBLISHED);
+        }
+
         return quizRepository.findAll();
     }
 
