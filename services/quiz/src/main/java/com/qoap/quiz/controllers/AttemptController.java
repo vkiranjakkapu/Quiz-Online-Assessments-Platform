@@ -12,10 +12,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.qoap.quiz.dto.APIResponseDto;
-import com.qoap.quiz.dto.SaveAnswerDto;
-import com.qoap.quiz.enums.CompletionStatus;
+import com.qoap.quiz.dto.SaveAnswersDto;
+import com.qoap.quiz.enums.AttemptStatus;
+import com.qoap.quiz.exceptions.QuizException;
+import com.qoap.quiz.models.Attempt;
 import com.qoap.quiz.services.AttemptsService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -52,7 +55,7 @@ public class AttemptController {
     }
 
     @GetMapping("/status/{status}")
-    public ResponseEntity<APIResponseDto> getAllAttemptByStatus(@PathVariable CompletionStatus status) {
+    public ResponseEntity<APIResponseDto> getAllAttemptByStatus(@PathVariable AttemptStatus status) {
         return ResponseEntity.ok(APIResponseDto.builder().data(attemptsService.getAllAttemptsByStatus(status)).build());
     }
 
@@ -67,14 +70,13 @@ public class AttemptController {
                 .ok(APIResponseDto.builder().data(attemptsService.getAllAttemptsByQuizIds(quizIds)).build());
     }
 
-    @PostMapping("/quiz/{quizId}")
-    public ResponseEntity<APIResponseDto> createAttempt(@PathVariable Long quizId) {
-        return ResponseEntity.ok(APIResponseDto.builder().data(null).build());
-    }
-
-    @PostMapping("/auto-save")
-    public ResponseEntity<APIResponseDto> autoSaveAttempt(@RequestBody SaveAnswerDto request) {
-        return ResponseEntity.ok(APIResponseDto.builder().data(null).build());
+    @PostMapping("/save")
+    public ResponseEntity<APIResponseDto> saveAttempt(@Valid @RequestBody SaveAnswersDto request) {
+        Attempt savedAttempt = attemptsService.saveAnswers(request);
+        if (savedAttempt.getStatus().equals(AttemptStatus.AUTO_COMPLETED)) {
+            throw new QuizException("Quiz has been submitted as the time was complete.");
+        }
+        return ResponseEntity.ok(APIResponseDto.builder().data(savedAttempt).build());
     }
 
 }

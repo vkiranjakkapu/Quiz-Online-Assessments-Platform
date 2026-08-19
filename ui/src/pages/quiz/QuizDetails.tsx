@@ -9,13 +9,13 @@ import {
     PuzzlePieceIcon,
 } from "@heroicons/react/24/outline";
 import { useCallback, useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { ActionButtonGroup } from "../../components/button/ActionButton";
-import { renderCellValue } from "../../components/Helper";
 import SectionLayout from "../../components/SectionLayout";
 import { RoutePaths } from "../../routes/RoutePaths";
 import QuizService, { QuizStatus, type Quiz } from "../../services/QuizService";
 import QuizCard from "./QuizCard";
+import BadgeComponent from "../../components/BadgeComponent";
 
 export default function QuizDetails() {
     const { quizId } = useParams<{ quizId: string }>();
@@ -64,8 +64,13 @@ export default function QuizDetails() {
             });
     }, [quizId, fetchSimilarQuizzes]);
 
-    if (quiz?.status === QuizStatus.DRAFT) {
-        navigate(RoutePaths.QUIZZES);
+    if (
+        [
+            QuizStatus.DRAFT.toString(),
+            QuizStatus.UN_PUBLISHED.toString(),
+        ].includes(quiz?.status ?? "")
+    ) {
+        return <Navigate to={RoutePaths.QUIZZES} replace />;
     }
 
     return (
@@ -76,7 +81,7 @@ export default function QuizDetails() {
                     uri: RoutePaths.QUIZZES,
                 },
                 {
-                    text: quizId ?? "",
+                    text: quiz?.title ?? "loading...",
                     uri: RoutePaths.QUIZ_DETAILS.replace(
                         ":quizId",
                         quizId ?? "",
@@ -90,7 +95,7 @@ export default function QuizDetails() {
                     <div
                         className={`col-span-full ${similarQuizzes.length == 0 ? "col-span-full" : "md:col-span-4 lg:col-span-5"}`}
                     >
-                        <div className="dark:bg-slate-800 shadow-sm w-full lg:w-4/5 mx-auto p-4 rounded-lg border border-slate-200 dark:border-slate-700 space-y-3">
+                        <div className="dark:bg-slate-700/40 shadow-sm w-full lg:w-4/5 mx-auto p-4 rounded-lg border border-slate-200 dark:border-slate-700 space-y-3">
                             {loading ? (
                                 <div className="inline-flex justify-center items-center w-full gap-3">
                                     <div className="h-5 w-5 rounded-full border-2 border-t-primary border-slate-300 animate-spin"></div>
@@ -103,7 +108,7 @@ export default function QuizDetails() {
                                             <h1 className="font-semibold text-secondary dark:text-white">
                                                 {quiz?.title}
                                             </h1>
-                                            <span className="text-sm rounded-sm py-1 px-1.5 bg-slate-200 dark:bg-slate-900 ">
+                                            <span className="text-sm rounded-sm py-1 px-1.5 bg-slate-200 dark:bg-slate-900/80 ">
                                                 {quiz?.category?.name}
                                             </span>
                                         </div>
@@ -214,11 +219,12 @@ export default function QuizDetails() {
                                             <span className="font-semibold ">
                                                 Difficulty:
                                             </span>
-                                            <span>
-                                                {renderCellValue(
-                                                    quiz?.settings?.difficulty,
-                                                )}
-                                            </span>
+                                            <BadgeComponent
+                                                value={
+                                                    quiz?.settings
+                                                        ?.difficulty ?? ""
+                                                }
+                                            />
                                         </span>
                                     </div>
                                 </>

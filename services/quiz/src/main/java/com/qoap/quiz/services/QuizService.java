@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import com.qoap.quiz.dto.CreateQuizRequestDto;
+import com.qoap.quiz.dto.QuizResponseDto;
 import com.qoap.quiz.dto.UpdateQuizRequestDto;
 import com.qoap.quiz.enums.QuizStatus;
 import com.qoap.quiz.models.Quiz;
@@ -15,6 +16,8 @@ import com.qoap.quiz.models.Quiz;
 public interface QuizService {
 
     Quiz getQuizById(UUID id);
+
+    QuizResponseDto<Object> mapQuizResponse(Quiz quiz);
 
     List<Quiz> getAllQuizzes();
 

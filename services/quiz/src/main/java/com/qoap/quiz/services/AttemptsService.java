@@ -4,9 +4,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import com.qoap.quiz.dto.AutoSaveRequestDto;
-import com.qoap.quiz.dto.SaveAnswerDto;
-import com.qoap.quiz.enums.CompletionStatus;
+import com.qoap.quiz.dto.SaveAnswersDto;
+import com.qoap.quiz.enums.AttemptStatus;
 import com.qoap.quiz.models.Attempt;
 
 public interface AttemptsService {
@@ -17,7 +16,7 @@ public interface AttemptsService {
 
     List<Attempt> getAllAttemptsByQuizIds(Set<UUID> quizIds);
 
-    List<Attempt> getAllAttemptsByStatus(CompletionStatus status);
+    List<Attempt> getAllAttemptsByStatus(AttemptStatus status);
 
     Attempt getAttemptById(Long attemptId);
 
@@ -25,8 +24,6 @@ public interface AttemptsService {
 
     Attempt createAttempt(UUID quizId, UUID studentId);
 
-    Attempt saveAnswer(SaveAnswerDto request);
-
-    Attempt autoSaveAnswers(AutoSaveRequestDto request);
+    Attempt saveAnswers(SaveAnswersDto request);
 
 }

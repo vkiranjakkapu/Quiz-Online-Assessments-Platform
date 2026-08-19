@@ -2,12 +2,13 @@ package com.qoap.quiz.models;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
 import org.hibernate.annotations.CreationTimestamp;
 
-import com.qoap.quiz.enums.CompletionStatus;
+import com.qoap.quiz.enums.AttemptStatus;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -58,14 +59,15 @@ public class Attempt {
     @Column(length = 3)
     private Integer unAnswered;
 
+    @Builder.Default
     @OneToMany(mappedBy = "attempt", cascade = CascadeType.ALL)
-    private Set<Answer> answers;
+    private Set<Answer> answers = new HashSet<>();
 
     private Duration timeSpent;
 
     @Enumerated(EnumType.STRING)
     @Builder.Default
-    private CompletionStatus status = CompletionStatus.IN_PROGRESS;
+    private AttemptStatus status = AttemptStatus.IN_PROGRESS;
 
     @CreationTimestamp
     private LocalDateTime attemptTime;

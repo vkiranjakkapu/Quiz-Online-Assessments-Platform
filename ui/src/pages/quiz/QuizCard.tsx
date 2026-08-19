@@ -5,10 +5,10 @@ import {
     PencilIcon,
     TrashIcon,
 } from "@heroicons/react/24/outline";
-import type { ReactNode } from "react";
-import { QuizStatus, type Quiz } from "../../services/QuizService";
-import usePrincipal from "../../context/usePrincipal";
+import BadgeComponent from "../../components/BadgeComponent";
 import ActionButton from "../../components/button/ActionButton";
+import usePrincipal from "../../context/usePrincipal";
+import { QuizStatus, type Quiz } from "../../services/QuizService";
 
 export type QuizCardProps = {
     quiz: Quiz;
@@ -16,7 +16,6 @@ export type QuizCardProps = {
     handleEdit?: (quiz: Quiz) => void;
     handlePublish?: (quiz: Quiz) => void;
     handleDelete?: (id: string) => void;
-    renderCellValue?: (input: unknown) => ReactNode;
 };
 
 export default function QuizCard({
@@ -25,7 +24,6 @@ export default function QuizCard({
     handleEdit,
     handlePublish,
     handleDelete,
-    renderCellValue,
 }: QuizCardProps) {
     const { isAdmin } = usePrincipal();
 
@@ -57,9 +55,14 @@ export default function QuizCard({
                         Duration {quiz.settings?.maxDuration?.substring(2)}
                     </span>
                 </div>
-                {renderCellValue && (
-                    <p className="text-sm">{renderCellValue(quiz.status)}</p>
-                )}
+                <div className="" title="Quiz Difficulty Level">
+                    {isAdmin() && <BadgeComponent value={quiz.status ?? ""} />}
+                    {!isAdmin() && (
+                        <BadgeComponent
+                            value={quiz.settings?.difficulty ?? ""}
+                        />
+                    )}
+                </div>
                 {isAdmin() && (handleEdit || handlePublish || handleDelete) && (
                     <div className="inline-flex rounded-lg overflow-hidden outline outline-primary outline-offset-2">
                         {handleEdit && (
@@ -99,17 +102,19 @@ export default function QuizCard({
                         )}
                     </div>
                 )}
-                <div className="inline-flex rounded-lg overflow-hidden outline outline-primary outline-offset-2">
-                    <ActionButton
-                        icon={InformationCircleIcon}
-                        text="Details"
-                        theme="primary"
-                        onClick={() => {
-                            handleAttempt(quiz.id ?? "");
-                        }}
-                        resetStyles="text-sm"
-                    />
-                </div>
+                {quiz.status !== QuizStatus.DRAFT && (
+                    <div className="inline-flex rounded-lg overflow-hidden outline outline-primary outline-offset-2">
+                        <ActionButton
+                            icon={InformationCircleIcon}
+                            text="Details"
+                            theme="primary"
+                            onClick={() => {
+                                handleAttempt(quiz.id ?? "");
+                            }}
+                            resetStyles="text-sm"
+                        />
+                    </div>
+                )}
             </div>
         </div>
     );

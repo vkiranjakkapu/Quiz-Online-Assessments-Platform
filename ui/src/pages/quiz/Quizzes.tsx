@@ -37,7 +37,6 @@ import {
     type OptionElementProps,
 } from "../../components/form/SelectComponent";
 import { TextAreaComponent } from "../../components/form/TextAreaComponent";
-import { renderCellValue } from "../../components/Helper";
 import ModalComponent from "../../components/ModalComponent";
 import type { NotificationProps } from "../../components/Notification";
 import Notification from "../../components/Notification";
@@ -65,6 +64,7 @@ export type QuizSearchProps = {
     title?: string;
     category?: string;
     status?: QuizStatus;
+    difficulty?: QuizDifficulty;
 };
 
 export default function Quizzes() {
@@ -150,7 +150,17 @@ export default function Quizzes() {
                 ? q.status === searchQuery.status
                 : true;
 
-            return matchesTitle && matchesCategory && matchesStatus;
+            // Status Filter
+            const matchesDifficulty = searchQuery.difficulty
+                ? q.settings?.difficulty === searchQuery.difficulty
+                : true;
+
+            return (
+                matchesTitle &&
+                matchesCategory &&
+                matchesStatus &&
+                matchesDifficulty
+            );
         });
     }, [searchQuery, allQuizzes]);
 
@@ -277,6 +287,7 @@ export default function Quizzes() {
                 });
                 setLoadingStatus(true);
                 refreshQuizzes();
+                refreshCategories();
 
                 const intervalId = setInterval(() => {
                     setSecondsLeft((prev) => {
@@ -1057,7 +1068,7 @@ export default function Quizzes() {
                                         )}
                                     <hr className="col-span-full border border-slate-200 dark:border-slate-700/50" />
                                     <div className="grid grid-cols-1 gap-2">
-                                        {/* Question Buttons */}
+                                        {/* Question Numbers */}
                                         <div className="overflow-x-scroll">
                                             <div className="inline-flex gap-1 items-center text-sm">
                                                 {selectedQuiz?.questions
@@ -1462,33 +1473,77 @@ export default function Quizzes() {
                                         }}
                                         customize="w-full"
                                     />
-                                    {/* Status Select */}
-                                    <SelectComponent
-                                        id="filterStatus"
-                                        value={searchQuery?.status ?? ""}
-                                        label={{ icon: EllipsisHorizontalIcon }}
-                                        selection="Status"
-                                        options={
-                                            Object.keys(QuizStatus).map(
-                                                (status) => ({
-                                                    data: {
-                                                        text: status,
-                                                        value: status,
-                                                    },
-                                                }),
-                                            ) as OptionElementProps[]
-                                        }
-                                        onChange={(e) => {
-                                            const val = e.target.value
-                                                ? (e.target.value as QuizStatus)
-                                                : undefined;
-                                            setSearchQuery((prev) => ({
-                                                ...(prev ?? {}),
-                                                status: val,
-                                            }));
-                                        }}
-                                        customize="w-full"
-                                    />
+                                    {isAdmin() ? (
+                                        <>
+                                            {/* Status Select */}
+                                            <SelectComponent
+                                                id="filterStatus"
+                                                value={
+                                                    searchQuery?.status ?? ""
+                                                }
+                                                label={{
+                                                    icon: EllipsisHorizontalIcon,
+                                                }}
+                                                selection="Status"
+                                                options={
+                                                    Object.keys(QuizStatus).map(
+                                                        (status) => ({
+                                                            data: {
+                                                                text: status,
+                                                                value: status,
+                                                            },
+                                                        }),
+                                                    ) as OptionElementProps[]
+                                                }
+                                                onChange={(e) => {
+                                                    const val = e.target.value
+                                                        ? (e.target
+                                                              .value as QuizStatus)
+                                                        : undefined;
+                                                    setSearchQuery((prev) => ({
+                                                        ...(prev ?? {}),
+                                                        status: val,
+                                                    }));
+                                                }}
+                                                customize="w-full"
+                                            />
+                                        </>
+                                    ) : (
+                                        <>
+                                            {/* Difficulty Select */}
+                                            <SelectComponent
+                                                id="filterDifficulty"
+                                                value={
+                                                    searchQuery?.status ?? ""
+                                                }
+                                                label={{
+                                                    icon: EllipsisHorizontalIcon,
+                                                }}
+                                                selection="Level"
+                                                options={
+                                                    Object.keys(
+                                                        QuizDifficulty,
+                                                    ).map((status) => ({
+                                                        data: {
+                                                            text: status,
+                                                            value: status,
+                                                        },
+                                                    })) as OptionElementProps[]
+                                                }
+                                                onChange={(e) => {
+                                                    const val = e.target.value
+                                                        ? (e.target
+                                                              .value as QuizDifficulty)
+                                                        : undefined;
+                                                    setSearchQuery((prev) => ({
+                                                        ...(prev ?? {}),
+                                                        difficulty: val,
+                                                    }));
+                                                }}
+                                                customize="w-full"
+                                            />
+                                        </>
+                                    )}
                                     {/* Reset Action Button */}
                                     <ActionButton
                                         resetStyles=""
@@ -1550,7 +1605,6 @@ export default function Quizzes() {
                                         handleEdit={editQuiz}
                                         handlePublish={updateQuizStatus}
                                         handleDelete={deleteQuiz}
-                                        renderCellValue={renderCellValue}
                                     />
                                 ))}
                             </div>
