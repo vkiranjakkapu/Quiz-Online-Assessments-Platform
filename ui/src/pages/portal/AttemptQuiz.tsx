@@ -17,27 +17,27 @@ import {
     type SetStateAction,
 } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import BadgeComponent from "../../../components/BadgeComponent";
-import ActionButton from "../../../components/button/ActionButton";
-import type { NotificationProps } from "../../../components/Notification";
-import Notification from "../../../components/Notification";
-import SectionLayout from "../../../components/SectionLayout";
-import SpinnerComponent from "../../../components/SpinnerComponent";
-import useProfile from "../../../context/useProfile";
-import { RoutePaths } from "../../../routes/RoutePaths";
+import BadgeComponent from "../../components/BadgeComponent";
+import ActionButton from "../../components/button/ActionButton";
+import type { NotificationProps } from "../../components/Notification";
+import Notification from "../../components/Notification";
+import SectionLayout from "../../components/SectionLayout";
+import SpinnerComponent from "../../components/SpinnerComponent";
+import useProfile from "../../context/useProfile";
+import { RoutePaths } from "../../routes/RoutePaths";
 import AttemptService, {
     AttemptStatus,
     SaveProgress,
     type Attempt,
     type AttemptProgress,
     type QuizAnswers,
-} from "../../../services/AttemptService";
-import type { Question, Quiz } from "../../../services/QuizService";
-import QuizService from "../../../services/QuizService";
+} from "../../services/AttemptService";
+import type { Question, Quiz } from "../../services/QuizService";
+import QuizService from "../../services/QuizService";
 import {
     formatSecondsToDisplay,
     parseIsoDurationToSeconds,
-} from "../../../utils/DateTimeParseHelper";
+} from "../../utils/DateTimeParseHelper";
 import { useQuizGuard } from "./useQuizGaurd";
 
 type AllNotifications = {

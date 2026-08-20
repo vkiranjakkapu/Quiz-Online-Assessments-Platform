@@ -1,6 +1,6 @@
 import { useEffect } from "react";
-import type { AttemptProgress } from "../../../services/AttemptService";
-import AttemptService from "../../../services/AttemptService";
+import type { AttemptProgress } from "../../services/AttemptService";
+import AttemptService from "../../services/AttemptService";
 
 /**
  * Handles tab close, page refresh, tab switch, and route changes for active quiz attempts.

@@ -8,11 +8,11 @@ import LandingPage from "../pages/landing/LandingPage";
 import Quizzes from "../pages/quiz/Quizzes";
 import QuizDetails from "../pages/quiz/QuizDetails";
 import AttemptDetails from "../pages/attempts/AttemptDetails";
-import AttemptQuiz from "../pages/attempts/portal/AttemptQuiz";
 import Users from "../pages/users/Users";
 import Profile from "../pages/profile/Profile";
 import Attempts from "../pages/attempts/AttemptsPage";
 import LeaderBoard from "../pages/leaderboard/LeaderBoard";
+import QuizAttempt from "../pages/portal/AttemptQuiz";
 
 export default function AppRoutes() {
     return (
@@ -37,7 +37,7 @@ export default function AppRoutes() {
                 ></Route>
                 <Route
                     path={RoutePaths.QUIZ_ATTEMPT}
-                    element={<AttemptQuiz />}
+                    element={<QuizAttempt />}
                 ></Route>
 
                 <Route

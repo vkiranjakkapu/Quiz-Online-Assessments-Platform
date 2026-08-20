@@ -53,7 +53,7 @@ import QuizService, {
     type QuestionOption,
     type Quiz,
 } from "../../services/QuizService";
-import QuizCard from "./QuizCard";
+import QuizCard from "../../components/quiz/QuizCard";
 import SpinnerComponent from "../../components/SpinnerComponent";
 
 type AllNotifications = {

@@ -20,7 +20,7 @@ export default function SectionLayout({
     const navigate = useNavigate();
 
     return (
-        <section className="rounded-lg shadow-sm bg-slate-50 dark:bg-gray-800 dark:text-white">
+        <section className="rounded-lg shadow-sm bg-slate-50 border border-slate-200 dark:border-slate-700 dark:bg-gray-800 dark:text-white">
             <div className="p-6 space-y-4">
                 {(title || breadCrumbs || description) && (
                     <>

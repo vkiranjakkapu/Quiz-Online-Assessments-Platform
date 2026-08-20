@@ -3,8 +3,8 @@ import { Navigate, useNavigate, useParams } from "react-router-dom";
 import SectionLayout from "../../components/SectionLayout";
 import { RoutePaths } from "../../routes/RoutePaths";
 import QuizService, { QuizStatus, type Quiz } from "../../services/QuizService";
-import QuizCard from "./QuizCard";
-import QuizInfoCard from "./QuizInfoCard";
+import QuizCard from "../../components/quiz/QuizCard";
+import QuizInfoCard from "../../components/quiz/QuizInfoCard";
 import SpinnerComponent from "../../components/SpinnerComponent";
 import AttemptsPage from "../attempts/AttemptsPage";
 import type { Attempt } from "../../services/AttemptService";
@@ -92,12 +92,12 @@ export default function QuizDetails() {
                     <div
                         className={`col-span-full order-1 ${similarQuizzes.length == 0 ? "col-span-full" : "md:col-span-4 lg:col-span-5"}`}
                     >
-                        <div className="dark:bg-slate-700/40 shadow-sm  mx-auto p-4 rounded-lg border border-slate-200 dark:border-slate-700 space-y-3">
+                        <div className="mx-auto rounded-lg">
                             {loading ? (
                                 <SpinnerComponent text="Fetching Quiz Details..." />
                             ) : (
                                 <QuizInfoCard
-                                    key={attempts.length}
+                                    key={attempts.length + "" + quiz?.id}
                                     quiz={quiz ?? {}}
                                     showAttempt={
                                         attempts.length <

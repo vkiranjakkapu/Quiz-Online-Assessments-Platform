@@ -9,9 +9,9 @@ import {
     PencilSquareIcon,
     PuzzlePieceIcon,
 } from "@heroicons/react/24/outline";
-import { ActionButtonGroup } from "../../components/button/ActionButton";
+import { ActionButtonGroup } from "../button/ActionButton";
 import { RoutePaths } from "../../routes/RoutePaths";
-import BadgeComponent from "../../components/BadgeComponent";
+import BadgeComponent from "../BadgeComponent";
 import { useNavigate } from "react-router-dom";
 import type { Quiz } from "../../services/QuizService";
 
@@ -27,15 +27,13 @@ export default function QuizInfoCard({
     const navigate = useNavigate();
 
     return (
-        <>
+        <div className="space-y-3 bg-slate-100 dark:bg-slate-900 p-4 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700">
             <div className="inline-flex justify-between items-center w-full">
-                <div className="text-start">
+                <div className="text-start space-y-1">
                     <h1 className="font-semibold text-secondary dark:text-white">
                         {quiz.title}
                     </h1>
-                    <span className="text-sm rounded-sm py-1 px-1.5 bg-slate-200 dark:bg-slate-900/80 ">
-                        {quiz.category?.name}
-                    </span>
+                    <BadgeComponent value={quiz.category?.name+""} type="info" />
                 </div>
                 {showAttempt && (
                     <ActionButtonGroup
@@ -142,6 +140,6 @@ export default function QuizInfoCard({
                     <BadgeComponent value={quiz.settings?.difficulty ?? ""} />
                 </span>
             </div>
-        </>
+        </div>
     );
 }

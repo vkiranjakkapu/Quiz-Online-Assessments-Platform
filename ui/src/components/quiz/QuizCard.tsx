@@ -7,8 +7,8 @@ import {
     PencilIcon,
     TrashIcon,
 } from "@heroicons/react/24/outline";
-import BadgeComponent from "../../components/BadgeComponent";
-import ActionButton from "../../components/button/ActionButton";
+import BadgeComponent from "../BadgeComponent";
+import ActionButton from "../button/ActionButton";
 import usePrincipal from "../../context/usePrincipal";
 import { QuizStatus, type Quiz } from "../../services/QuizService";
 

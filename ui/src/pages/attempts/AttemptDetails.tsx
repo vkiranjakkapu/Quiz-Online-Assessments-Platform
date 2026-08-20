@@ -5,7 +5,7 @@ import SpinnerComponent from "../../components/SpinnerComponent";
 import { RoutePaths } from "../../routes/RoutePaths";
 import type { Attempt } from "../../services/AttemptService";
 import AttemptService from "../../services/AttemptService";
-import QuizInfoCard from "../quiz/QuizInfoCard";
+import QuizInfoCard from "../../components/quiz/QuizInfoCard";
 
 export default function AttemptDetails() {
     const { attemptId } = useParams<{ attemptId: string }>();
@@ -46,7 +46,8 @@ export default function AttemptDetails() {
                     text="fetching attempt details..."
                 />
             ) : (
-                <div className="space-y-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <QuizInfoCard quiz={attempt.quiz} showAttempt={false} />
                     <QuizInfoCard quiz={attempt.quiz} showAttempt={false} />
                 </div>
             )}
