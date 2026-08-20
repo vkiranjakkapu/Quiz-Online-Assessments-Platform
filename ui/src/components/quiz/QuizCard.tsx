@@ -1,14 +1,16 @@
 import {
     ArchiveBoxXMarkIcon,
+    CheckBadgeIcon,
+    ClockIcon,
     InformationCircleIcon,
     MegaphoneIcon,
     PencilIcon,
     TrashIcon,
 } from "@heroicons/react/24/outline";
-import type { ReactNode } from "react";
-import { QuizStatus, type Quiz } from "../../services/QuizService";
+import BadgeComponent from "../BadgeComponent";
+import ActionButton from "../button/ActionButton";
 import usePrincipal from "../../context/usePrincipal";
-import ActionButton from "../../components/button/ActionButton";
+import { QuizStatus, type Quiz } from "../../services/QuizService";
 
 export type QuizCardProps = {
     quiz: Quiz;
@@ -16,7 +18,6 @@ export type QuizCardProps = {
     handleEdit?: (quiz: Quiz) => void;
     handlePublish?: (quiz: Quiz) => void;
     handleDelete?: (id: string) => void;
-    renderCellValue?: (input: unknown) => ReactNode;
 };
 
 export default function QuizCard({
@@ -25,12 +26,11 @@ export default function QuizCard({
     handleEdit,
     handlePublish,
     handleDelete,
-    renderCellValue,
 }: QuizCardProps) {
     const { isAdmin } = usePrincipal();
 
     return (
-        <div className="rounded-lg overflow-hidden bg-slate-50 hover:bg-slate-200/40 dark:bg-slate-800 hover:dark:bg-slate-900/60 shadow-sm hover:shadow-md border border-slate-200 dark:border-slate-700 p-2 transition-all duration-100">
+        <div className="rounded-lg min-w-60 md:min-w-auto overflow-hidden bg-slate-50 hover:bg-slate-200/40 dark:bg-slate-800 hover:dark:bg-slate-900/60 shadow-sm hover:shadow-md border border-slate-200 dark:border-slate-700 p-2 transition-all duration-100">
             <div className="relative rounded-lg overflow-hidden">
                 <div className="absolute inset-0 bg-slate-950/30 backdrop-blur-sm"></div>
                 <img
@@ -47,19 +47,27 @@ export default function QuizCard({
                     </div>
                 </div>
             </div>
-            <div className="p-2 space-y-3 text-center">
-                <div className="w-full flex flex-col md:flex-row justify-center items-center gap-2 text-sm">
-                    <span className="text-start">
-                        No.Of Qs - {quiz.questions?.length}
+            <div className="p-2 space-y-2 text-center">
+                <div className="w-full flex flex-col md:flex-row justify-center items-center gap-1 text-sm">
+                    <CheckBadgeIcon className="size-4" />
+                    <span>
+                        Passing Score: {quiz.settings?.passingScore}
                     </span>
-                    <span className="hidden md:block">|</span>
-                    <span className="text-end">
+                </div>
+                <div className="w-full flex flex-col md:flex-row justify-center items-center gap-1 text-sm">
+                    <ClockIcon className="size-4" />
+                    <span>
                         Duration {quiz.settings?.maxDuration?.substring(2)}
                     </span>
                 </div>
-                {renderCellValue && (
-                    <p className="text-sm">{renderCellValue(quiz.status)}</p>
-                )}
+                <div className="" title="Quiz Difficulty Level">
+                    {isAdmin() && <BadgeComponent value={quiz.status ?? ""} />}
+                    {!isAdmin() && (
+                        <BadgeComponent
+                            value={quiz.settings?.difficulty ?? ""}
+                        />
+                    )}
+                </div>
                 {isAdmin() && (handleEdit || handlePublish || handleDelete) && (
                     <div className="inline-flex rounded-lg overflow-hidden outline outline-primary outline-offset-2">
                         {handleEdit && (
@@ -99,17 +107,19 @@ export default function QuizCard({
                         )}
                     </div>
                 )}
-                <div className="inline-flex rounded-lg overflow-hidden outline outline-primary outline-offset-2">
-                    <ActionButton
-                        icon={InformationCircleIcon}
-                        text="Details"
-                        theme="primary"
-                        onClick={() => {
-                            handleAttempt(quiz.id ?? "");
-                        }}
-                        resetStyles="text-sm"
-                    />
-                </div>
+                {quiz.status !== QuizStatus.DRAFT && (
+                    <div className="inline-flex rounded-lg overflow-hidden outline outline-primary outline-offset-2">
+                        <ActionButton
+                            icon={InformationCircleIcon}
+                            text="Details"
+                            theme="primary"
+                            onClick={() => {
+                                handleAttempt(quiz.id ?? "");
+                            }}
+                            resetStyles="text-sm"
+                        />
+                    </div>
+                )}
             </div>
         </div>
     );

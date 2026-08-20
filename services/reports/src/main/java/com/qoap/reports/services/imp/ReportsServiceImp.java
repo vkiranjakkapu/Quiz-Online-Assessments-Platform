@@ -44,8 +44,9 @@ public class ReportsServiceImp implements ReportsService {
 				.map(Quiz::getId)
 				.collect(Collectors.toSet());
 
-		Map<Quiz, List<Attempt>> attemptsPerQuiz = quizService.getAttemptsByQuizIds(allQuizIds).stream()
-				.collect(Collectors.groupingBy(Attempt::getQuiz));
+		// 1. Group attempts by Quiz ID instead of the Quiz object itself
+		Map<UUID, List<Attempt>> attemptsPerQuizId = quizService.getAttemptsByQuizIds(allQuizIds).stream()
+				.collect(Collectors.groupingBy(attempt -> attempt.getQuiz().getId()));
 
 		LocalDate today = LocalDate.now();
 		LocalDate firstDay = month.atDay(1);
@@ -53,12 +54,12 @@ public class ReportsServiceImp implements ReportsService {
 				? today
 				: month.atEndOfMonth();
 
-		// ? Fill report for every day in range (populating 0s for missing days)
 		for (LocalDate date = firstDay; !date.isAfter(lastDayToReport); date = date.plusDays(1)) {
 			List<Quiz> quizzes = allQuizzesPerDayInMonth.getOrDefault(date, Collections.emptyList());
 
+			// 2. Lookup using q.getId()
 			int totalAttempts = quizzes.stream()
-					.mapToInt(q -> attemptsPerQuiz.getOrDefault(q, Collections.emptyList()).size())
+					.mapToInt(q -> attemptsPerQuizId.getOrDefault(q.getId(), Collections.emptyList()).size())
 					.sum();
 
 			reports.add(QuizTrendsResponseDto.builder()

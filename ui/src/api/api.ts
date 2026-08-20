@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { type AxiosRequestConfig } from "axios";
 import { AppConfig } from "../config/AppConfig";
 import { handleErrorResponse } from "../utils/ErrorHandler";
 import configureRequestInterceptor from "./RequestInterceptor";
@@ -31,8 +31,9 @@ export type ValidationErrors = {
 export type ApiClientProps = {
     type: "get" | "post" | "put" | "patch" | "delete";
     uri: string;
-    service: "identity" | "profile" | "quiz" | "reports";
+    service: "identity" | "profile" | "quiz" | "attempts" | "reports";
     payload?: unknown;
+    config?: AxiosRequestConfig<unknown, unknown>;
 };
 
 export async function apiClient<T>({
@@ -40,6 +41,7 @@ export async function apiClient<T>({
     uri,
     service,
     payload,
+    config,
 }: ApiClientProps): Promise<T | ErrorResponse> {
     try {
         let response, url;
@@ -50,12 +52,14 @@ export async function apiClient<T>({
             url = AppConfig.IDENTITY_PROFILE_URL;
         } else if (service == "quiz") {
             url = AppConfig.QUIZ_SERVICE_URL;
+        } else if (service == "attempts") {
+            url = AppConfig.QUIZ_ATTEMPT_URL;
         } else {
             url = AppConfig.REPORTS_SERVICE_URL;
         }
 
         if (type.toLowerCase() == "post") {
-            response = await api.post(url + uri, payload);
+            response = await api.post(url + uri, payload, config);
         } else if (type.toLowerCase() == "put") {
             response = await api.put(url + uri, payload);
         } else if (type.toLowerCase() == "patch") {

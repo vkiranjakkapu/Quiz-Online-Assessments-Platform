@@ -1,5 +1,5 @@
 import { Navigate, Outlet } from "react-router-dom";
-import DashboardLayout from "../components/DashboardLayout";
+import DashboardLayout from "../components/layouts/DashboardLayout";
 import usePrincipal, { AuthStatus } from "../context/usePrincipal";
 import { RoutePaths } from "../routes/RoutePaths";
 

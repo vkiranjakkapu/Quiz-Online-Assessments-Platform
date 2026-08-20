@@ -1,5 +1,5 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
-import BodyLayout from "../components/BodyLayout";
+import BodyLayout from "../components/layouts/BodyLayout";
 import usePrincipal from "../context/usePrincipal";
 import { RoutePaths } from "../routes/RoutePaths";
 

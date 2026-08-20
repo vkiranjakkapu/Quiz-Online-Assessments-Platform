@@ -1,5 +1,7 @@
 package com.qoap.quiz.services.imp;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.qoap.quiz.exceptions.ResourceNotFoundException;
@@ -19,6 +21,11 @@ public class QuestionServiceImp implements QuestionService {
     public Question getQuestionById(Long questionId) {
         return questionRepository.findById(questionId)
                 .orElseThrow(() -> new ResourceNotFoundException("Question with given ID not found"));
+    }
+
+    @Override
+    public List<Question> getAllQuestionsByIds(List<Long> qids) {
+        return questionRepository.findAllById(qids);
     }
 
 }

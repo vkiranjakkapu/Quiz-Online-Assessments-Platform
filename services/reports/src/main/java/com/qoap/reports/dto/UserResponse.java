@@ -1,8 +1,11 @@
 package com.qoap.reports.dto;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Set;
 import java.util.UUID;
 
+import com.qoap.reports.enums.RoleType;
 import com.qoap.reports.enums.UserGender;
 import com.qoap.reports.models.Address;
 
@@ -18,6 +21,8 @@ public record UserResponse(
 		UserGender gender,
 		Address address,
 		LocalDate dob,
-		boolean enabled
-) {
+		boolean enabled,
+		Set<RoleType> roles,
+		LocalDateTime createdAt,
+		LocalDateTime updatedAt) {
 }

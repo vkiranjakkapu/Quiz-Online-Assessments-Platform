@@ -12,21 +12,21 @@ import com.qoap.reports.dto.APIResponseDto;
 import com.qoap.reports.services.ReportsService;
 
 @RestController
-@RequestMapping("/reports/api/v1")
-public class ReportsController {
+@RequestMapping("/reports/api/v1/quiz")
+public class QuizReportsController {
 
     private ReportsService reportsService;
 
-    public ReportsController(ReportsService reportsService) {
+    public QuizReportsController(ReportsService reportsService) {
         this.reportsService = reportsService;
     }
 
-    @GetMapping("/quiz/monthly")
+    @GetMapping("/monthly")
     public ResponseEntity<APIResponseDto> getMonthlyQuizzesTrend() {
         return ResponseEntity.ok().body(APIResponseDto.builder().data(reportsService.getQuizReports()).build());
     }
 
-    @GetMapping("/quiz/monthly/{month}")
+    @GetMapping("/monthly/{month}")
     public ResponseEntity<APIResponseDto> getMonthlyQuizzesTrend(@PathVariable YearMonth month) {
         return ResponseEntity.ok().body(APIResponseDto.builder().data(reportsService.getQuizReports(month)).build());
     }

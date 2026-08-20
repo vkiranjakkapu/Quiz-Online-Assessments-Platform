@@ -2,7 +2,6 @@ package com.qoap.identity.controllers;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
@@ -22,6 +21,7 @@ import com.labmantix.platform.security.context.AuthenticationContext;
 import com.labmantix.platform.security.model.AuthenticatedUser;
 import com.qoap.identity.dto.APIResponseDto;
 import com.qoap.identity.dto.CreateUserRequestDto;
+import com.qoap.identity.dto.FetchUsersRequestDto;
 import com.qoap.identity.dto.PasswordChangeRequestDto;
 import com.qoap.identity.dto.UpdateUserRequest;
 import com.qoap.identity.dto.UserResponse;
@@ -98,9 +98,9 @@ public class UserController {
     @Operation(summary = "Get all users with ids")
     @PostMapping("/search")
     @PreAuthorize("hasAnyRole('ADMIN','AGENT','CUSTOMER')")
-    public ResponseEntity<APIResponseDto> getAllUsersWithIds(@RequestBody Set<UUID> ids) {
+    public ResponseEntity<APIResponseDto> getAllUsersWithIds(@RequestBody FetchUsersRequestDto request) {
         return ResponseEntity
-                .ok(APIResponseDto.builder().data(userService.getAllUsersWithIds(ids)).build());
+                .ok(APIResponseDto.builder().data(userService.getAllUsersWithIds(request.ids())).build());
     }
 
     @Operation(summary = "Update user")

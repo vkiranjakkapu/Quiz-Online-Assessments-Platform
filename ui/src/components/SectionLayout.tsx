@@ -5,7 +5,7 @@ import ActionButton, { type ActionButtonProps } from "./button/ActionButton";
 export type SectionLayoutProps = {
     children: ReactNode;
     title?: string;
-    breadCrumbs?: { text: string; uri: string }[];
+    breadCrumbs?: { text: string; uri?: string }[];
     description?: string;
     actionButtons?: ActionButtonProps[];
 };
@@ -20,7 +20,7 @@ export default function SectionLayout({
     const navigate = useNavigate();
 
     return (
-        <section className="rounded-lg shadow-sm bg-slate-50 dark:bg-gray-800 dark:text-white">
+        <section className="rounded-lg shadow-sm bg-slate-50 border border-slate-200 dark:border-slate-700 dark:bg-gray-800 dark:text-white">
             <div className="p-6 space-y-4">
                 {(title || breadCrumbs || description) && (
                     <>
@@ -36,7 +36,9 @@ export default function SectionLayout({
                                                   <a
                                                       key={idx}
                                                       onClick={() => {
-                                                          navigate(path.uri);
+                                                          navigate(
+                                                              path.uri ?? "#",
+                                                          );
                                                       }}
                                                       className={`text-secondary cursor-pointer transition-colors duration-75 capitalize ${
                                                           isLast

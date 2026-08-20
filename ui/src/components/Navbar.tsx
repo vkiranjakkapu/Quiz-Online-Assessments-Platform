@@ -6,6 +6,7 @@ import {
     HomeIcon,
     ListBulletIcon,
     MoonIcon,
+    SparklesIcon,
     Square2StackIcon,
     SunIcon,
     UserCircleIcon,
@@ -18,8 +19,9 @@ import usePrincipal from "../context/usePrincipal";
 import { RoutePaths } from "../routes/RoutePaths";
 import ActionButton from "./button/ActionButton";
 import Logo from "/logo.png";
-import UserDP from "/undraw_choose_5kz4.svg";
-import useProfile from "../context/useProfile";
+import FemaleProfile from "../assets/undraw_a-woman-avatar_ifsl.svg";
+import MaleProfile from "../assets/undraw_cool-guy-avatar_qjc4.svg";
+import useProfile, { UserGender } from "../context/useProfile";
 
 export type NavbarProps = {
     handleLoginClick?: () => void;
@@ -76,7 +78,13 @@ export default function Navbar({
             text: "Attempts",
             icon: Square2StackIcon,
             path: RoutePaths.ATTEMPTS,
-            roles: ["ADMIN", "STUDENT"],
+            roles: ["ADMIN"],
+        },
+        {
+            text: "Leaderboard",
+            icon: SparklesIcon,
+            path: RoutePaths.LEADERBOARD,
+            roles: ["STUDENT"],
         },
         {
             text: "Users",
@@ -85,6 +93,14 @@ export default function Navbar({
             roles: ["ADMIN"],
         },
     ];
+
+    if (
+        location.pathname.startsWith(
+            RoutePaths.QUIZ_ATTEMPT.replace(":quizId", ""),
+        )
+    ) {
+        return;
+    }
 
     return (
         <>
@@ -157,15 +173,24 @@ export default function Navbar({
                             className="p-1.5 cursor-pointer inline-flex gap-1 items-center justify-between rounded-full bg-primary dark:bg-slate-700 text-white outline outline-offset-2 outline-primary dark:outline-slate-700"
                         >
                             <img
-                                src={UserDP}
+                                src={
+                                    profile?.gender == UserGender.MALE
+                                        ? MaleProfile
+                                        : profile?.gender == UserGender.FEMALE
+                                          ? FemaleProfile
+                                          : "../src/assets/undraw_deep-thinker-avatar_6xg6.svg"
+                                }
                                 alt="User DP"
                                 className="size-5.5 bg-white rounded-full"
                             />
                             <span>{profile?.firstName}</span>
                             <ActionButton
                                 icon={ArrowLeftStartOnRectangleIcon}
-                                theme="primary"
-                                padding="p-none"
+                                // theme="primary"
+                                // text="Logout"
+                                resetStyles="ms-1 rounded-full bg-secondary transition-colors duration-200"
+                                title="Click to logout"
+                                padding="py-1 px-1.5"
                                 onClick={logout}
                             />
                         </div>
@@ -177,13 +202,15 @@ export default function Navbar({
                         onClick={toggleTheme}
                     />
                 </div>
+
+                {/* Mobile Nav */}
                 <div
                     className={`relative w-full md:hidden transition-all duration-100`}
                 >
                     <div
                         className={`absolute top-2 shadow-lg bg-slate-100 dark:bg-slate-800 p-4 rounded-b-lg w-full ${openNav ? "block" : "hidden"}`}
                     >
-                        <ul className="space-y-2 flex flex-col">
+                        <ul className="flex flex-col gap-3">
                             {navItems.map((item, idx) => {
                                 const IconComponent = item.icon;
                                 const isActive =
@@ -199,8 +226,8 @@ export default function Navbar({
                                     <li
                                         onClick={() => navigate(item.path)}
                                         key={idx}
-                                        className={`py-1.5 px-2 shadow-sm outline outline-offset-2 outline-primary dark:outline-slate-600 inline-flex gap-2 items-center cursor-pointer rounded text-white hover:bg-primary dark:hover:bg-slate-900
-                            ${isActive ? "bg-primary dark:bg-slate-900" : "bg-primary/80 dark:bg-slate-900/70"}
+                                        className={`py-1.5 px-2 shadow-sm outline outline-offset-2 outline-primary  inline-flex gap-2 items-center cursor-pointer rounded text-white hover:bg-primary 
+                            ${isActive ? "bg-primary dark:outline-sprimary dark:hover:bg-primary" : "bg-primary/80 dark:outline-slate-600 dark:bg-slate-900/70 dark:hover:bg-slate-800"}
                             `}
                                     >
                                         <IconComponent className="size-4.5" />
@@ -209,7 +236,7 @@ export default function Navbar({
                                 );
                             })}
                             <hr className="border-slate-500 dark:border-slate-700" />
-                            <ul className="inline-flex gap-3 items-center justify-around">
+                            <ul className="inline-flex gap-3 items-center justify-around transition-colors duration-100">
                                 {!isLoggedIn() ? (
                                     <>
                                         <li
@@ -229,16 +256,24 @@ export default function Navbar({
                                     </>
                                 ) : (
                                     <>
-                                        <li className="outline outline-offset-2 outline-primary dark:outline-slate-600 flex-1 py-1.5 px-2 inline-flex gap-2 items-center justify-center cursor-pointer rounded text-white bg-primary/80 dark:bg-slate-900/70 hover:bg-primary dark:hover:bg-slate-900/90">
+                                        <li className="outline outline-offset-2 outline-primary dark:outline-slate-600 flex-1 py-1.5 px-2 inline-flex gap-2 items-center justify-center cursor-pointer rounded text-white bg-primary/80 dark:bg-slate-900/70 hover:bg-primary dark:hover:bg-slate-800/90">
                                             <img
-                                                src={UserDP}
+                                                src={
+                                                    profile?.gender ==
+                                                    UserGender.MALE
+                                                        ? MaleProfile
+                                                        : profile?.gender ==
+                                                            UserGender.FEMALE
+                                                          ? FemaleProfile
+                                                          : "../src/assets/undraw_deep-thinker-avatar_6xg6.svg"
+                                                }
                                                 className="size-6 bg-white rounded-full"
                                             />
                                             <span>{profile?.firstName}</span>
                                         </li>
                                         <li
                                             onClick={logout}
-                                            className="outline outline-offset-2 outline-primary dark:outline-slate-600 flex-1 py-1.5 px-2 inline-flex gap-2 items-center justify-center cursor-pointer rounded text-white bg-primary/80 dark:bg-slate-900/70 hover:bg-primary dark:hover:bg-slate-900/90"
+                                            className="outline outline-offset-2 outline-primary dark:outline-slate-600 flex-1 py-1.5 px-2 inline-flex gap-2 items-center justify-center cursor-pointer rounded text-white bg-primary/80 dark:bg-slate-900/70 hover:bg-primary dark:hover:bg-rose-600/50 dark:hover:outline-rose-600/50"
                                         >
                                             <ArrowLeftStartOnRectangleIcon className="size-4.5" />
                                             <span>Logout</span>

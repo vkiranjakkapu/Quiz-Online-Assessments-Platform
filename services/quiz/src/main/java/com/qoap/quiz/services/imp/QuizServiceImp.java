@@ -17,6 +17,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.qoap.quiz.dto.CreateQuizRequestDto;
+import com.qoap.quiz.dto.QuizResponseDto;
+import com.qoap.quiz.dto.StudentOptionResponseDto;
+import com.qoap.quiz.dto.StudentQuestionResponseDto;
 import com.qoap.quiz.dto.UpdateOptionDto;
 import com.qoap.quiz.dto.UpdateQuestionDto;
 import com.qoap.quiz.dto.UpdateQuizRequestDto;
@@ -54,7 +57,6 @@ public class QuizServiceImp implements QuizService {
         if (currentUser.isStudent()) {
             return quizRepository.findAllByStatus(QuizStatus.PUBLISHED);
         }
-
         return quizRepository.findAll();
     }
 
@@ -62,6 +64,45 @@ public class QuizServiceImp implements QuizService {
     @Transactional(readOnly = true)
     public List<Quiz> getAllQuizzesByTitle(String title) {
         return quizRepository.searchByTitleFts(title);
+    }
+
+    @Override
+    public QuizResponseDto<Object> mapQuizResponse(Quiz quiz) {
+        Set<Object> questions = currentUser.isStudent()
+                ? new HashSet<>(mapToStudentQuestions(quiz.getQuestions()))
+                : new HashSet<>(quiz.getQuestions());
+
+        return QuizResponseDto.builder()
+                .id(quiz.getId())
+                .title(quiz.getTitle())
+                .description(quiz.getDescription())
+                .category(quiz.getCategory())
+                .settings(quiz.getSettings())
+                .questions(questions)
+                .status(quiz.getStatus())
+                .updatedAt(quiz.getUpdatedAt())
+                .createdAt(quiz.getCreatedAt())
+                .build();
+    }
+
+    private Set<StudentQuestionResponseDto> mapToStudentQuestions(Set<Question> questions) {
+        // removing question explanation and correct option indicator
+        return Optional.ofNullable(questions)
+                .orElseGet(Collections::emptySet)
+                .stream()
+                .map(q -> StudentQuestionResponseDto.builder()
+                        .id(q.getId())
+                        .questionText(q.getQuestionText())
+                        .marks(q.getMarks())
+                        .difficulty(q.getDifficulty())
+                        .options(q.getOptions().stream().map(op -> StudentOptionResponseDto.builder()
+                                .id(op.getId())
+                                .optionText(op.getOptionText())
+                                .createdAt(op.getCreatedAt())
+                                .build())
+                                .collect(Collectors.toSet()))
+                        .build())
+                .collect(Collectors.toSet());
     }
 
     @Override
@@ -164,6 +205,7 @@ public class QuizServiceImp implements QuizService {
         Quiz quiz = getQuizById(qid);
         quiz.setTitle(request.title());
         quiz.setDescription(request.description());
+        quiz.setStatus(request.status());
 
         Category category = Optional.ofNullable(request.category().id()).map(id -> categoryService.getCategoryById(id))
                 .orElseGet(() -> {

@@ -1,8 +1,8 @@
 package com.qoap.reports.enums;
 
-public enum CompletionStatus {
+public enum AttemptStatus {
     IN_PROGRESS,
     INTERUPTED,
     SUBMITTED,
-    COMPLETED,
+    AUTO_COMPLETED,
 }

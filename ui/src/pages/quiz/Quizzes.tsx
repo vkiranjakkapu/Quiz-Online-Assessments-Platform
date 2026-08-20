@@ -37,7 +37,6 @@ import {
     type OptionElementProps,
 } from "../../components/form/SelectComponent";
 import { TextAreaComponent } from "../../components/form/TextAreaComponent";
-import { renderCellValue } from "../../components/Helper";
 import ModalComponent from "../../components/ModalComponent";
 import type { NotificationProps } from "../../components/Notification";
 import Notification from "../../components/Notification";
@@ -54,7 +53,8 @@ import QuizService, {
     type QuestionOption,
     type Quiz,
 } from "../../services/QuizService";
-import QuizCard from "./QuizCard";
+import QuizCard from "../../components/quiz/QuizCard";
+import SpinnerComponent from "../../components/SpinnerComponent";
 
 type AllNotifications = {
     form: NotificationProps;
@@ -65,6 +65,7 @@ export type QuizSearchProps = {
     title?: string;
     category?: string;
     status?: QuizStatus;
+    difficulty?: QuizDifficulty;
 };
 
 export default function Quizzes() {
@@ -150,7 +151,17 @@ export default function Quizzes() {
                 ? q.status === searchQuery.status
                 : true;
 
-            return matchesTitle && matchesCategory && matchesStatus;
+            // Status Filter
+            const matchesDifficulty = searchQuery.difficulty
+                ? q.settings?.difficulty === searchQuery.difficulty
+                : true;
+
+            return (
+                matchesTitle &&
+                matchesCategory &&
+                matchesStatus &&
+                matchesDifficulty
+            );
         });
     }, [searchQuery, allQuizzes]);
 
@@ -277,6 +288,7 @@ export default function Quizzes() {
                 });
                 setLoadingStatus(true);
                 refreshQuizzes();
+                refreshCategories();
 
                 const intervalId = setInterval(() => {
                     setSecondsLeft((prev) => {
@@ -1057,7 +1069,7 @@ export default function Quizzes() {
                                         )}
                                     <hr className="col-span-full border border-slate-200 dark:border-slate-700/50" />
                                     <div className="grid grid-cols-1 gap-2">
-                                        {/* Question Buttons */}
+                                        {/* Question Numbers */}
                                         <div className="overflow-x-scroll">
                                             <div className="inline-flex gap-1 items-center text-sm">
                                                 {selectedQuiz?.questions
@@ -1411,10 +1423,7 @@ export default function Quizzes() {
             </ModalComponent>
 
             {loadingStatus ? (
-                <div className="text-semibold inline-flex gap-2 items-center">
-                    <div className="h-5 w-5 border-2 border-slate-300 border-t-primary rounded-full animate-spin"></div>
-                    <span>Fetching Quizzes...</span>
-                </div>
+                <SpinnerComponent text="Fetching Quizzes..." />
             ) : allQuizzes.length > 0 ? (
                 <>
                     <div className="space-y-4">
@@ -1462,33 +1471,77 @@ export default function Quizzes() {
                                         }}
                                         customize="w-full"
                                     />
-                                    {/* Status Select */}
-                                    <SelectComponent
-                                        id="filterStatus"
-                                        value={searchQuery?.status ?? ""}
-                                        label={{ icon: EllipsisHorizontalIcon }}
-                                        selection="Status"
-                                        options={
-                                            Object.keys(QuizStatus).map(
-                                                (status) => ({
-                                                    data: {
-                                                        text: status,
-                                                        value: status,
-                                                    },
-                                                }),
-                                            ) as OptionElementProps[]
-                                        }
-                                        onChange={(e) => {
-                                            const val = e.target.value
-                                                ? (e.target.value as QuizStatus)
-                                                : undefined;
-                                            setSearchQuery((prev) => ({
-                                                ...(prev ?? {}),
-                                                status: val,
-                                            }));
-                                        }}
-                                        customize="w-full"
-                                    />
+                                    {isAdmin() ? (
+                                        <>
+                                            {/* Status Select */}
+                                            <SelectComponent
+                                                id="filterStatus"
+                                                value={
+                                                    searchQuery?.status ?? ""
+                                                }
+                                                label={{
+                                                    icon: EllipsisHorizontalIcon,
+                                                }}
+                                                selection="Status"
+                                                options={
+                                                    Object.keys(QuizStatus).map(
+                                                        (status) => ({
+                                                            data: {
+                                                                text: status,
+                                                                value: status,
+                                                            },
+                                                        }),
+                                                    ) as OptionElementProps[]
+                                                }
+                                                onChange={(e) => {
+                                                    const val = e.target.value
+                                                        ? (e.target
+                                                              .value as QuizStatus)
+                                                        : undefined;
+                                                    setSearchQuery((prev) => ({
+                                                        ...(prev ?? {}),
+                                                        status: val,
+                                                    }));
+                                                }}
+                                                customize="w-full"
+                                            />
+                                        </>
+                                    ) : (
+                                        <>
+                                            {/* Difficulty Select */}
+                                            <SelectComponent
+                                                id="filterDifficulty"
+                                                value={
+                                                    searchQuery?.status ?? ""
+                                                }
+                                                label={{
+                                                    icon: EllipsisHorizontalIcon,
+                                                }}
+                                                selection="Level"
+                                                options={
+                                                    Object.keys(
+                                                        QuizDifficulty,
+                                                    ).map((status) => ({
+                                                        data: {
+                                                            text: status,
+                                                            value: status,
+                                                        },
+                                                    })) as OptionElementProps[]
+                                                }
+                                                onChange={(e) => {
+                                                    const val = e.target.value
+                                                        ? (e.target
+                                                              .value as QuizDifficulty)
+                                                        : undefined;
+                                                    setSearchQuery((prev) => ({
+                                                        ...(prev ?? {}),
+                                                        difficulty: val,
+                                                    }));
+                                                }}
+                                                customize="w-full"
+                                            />
+                                        </>
+                                    )}
                                     {/* Reset Action Button */}
                                     <ActionButton
                                         resetStyles=""
@@ -1550,7 +1603,6 @@ export default function Quizzes() {
                                         handleEdit={editQuiz}
                                         handlePublish={updateQuizStatus}
                                         handleDelete={deleteQuiz}
-                                        renderCellValue={renderCellValue}
                                     />
                                 ))}
                             </div>

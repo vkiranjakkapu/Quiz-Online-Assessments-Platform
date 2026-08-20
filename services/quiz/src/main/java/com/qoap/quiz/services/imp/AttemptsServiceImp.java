@@ -1,5 +1,10 @@
 package com.qoap.quiz.services.imp;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -10,17 +15,23 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.qoap.quiz.dto.AutoSaveRequestDto;
-import com.qoap.quiz.dto.SaveAnswerDto;
-import com.qoap.quiz.enums.CompletionStatus;
+import com.qoap.quiz.dto.AnswerDto;
+import com.qoap.quiz.dto.AttemptResponseDto;
+import com.qoap.quiz.dto.QuestionAnswersDto;
+import com.qoap.quiz.dto.SaveAnswersDto;
+import com.qoap.quiz.enums.AttemptStatus;
+import com.qoap.quiz.exceptions.ForbiddenQuizAttemptException;
+import com.qoap.quiz.exceptions.MalformedRequestException;
+import com.qoap.quiz.exceptions.QuizException;
 import com.qoap.quiz.exceptions.ResourceNotFoundException;
 import com.qoap.quiz.models.Answer;
 import com.qoap.quiz.models.Attempt;
+import com.qoap.quiz.models.Question;
+import com.qoap.quiz.models.QuestionOption;
 import com.qoap.quiz.models.Quiz;
 import com.qoap.quiz.repositories.AttemptRepository;
-import com.qoap.quiz.services.AnswersService;
 import com.qoap.quiz.services.AttemptsService;
-import com.qoap.quiz.services.OptionsService;
+import com.qoap.quiz.services.CurrentUserService;
 import com.qoap.quiz.services.QuestionService;
 import com.qoap.quiz.services.QuizService;
 
@@ -33,13 +44,15 @@ public class AttemptsServiceImp implements AttemptsService {
     private final AttemptRepository attemptRepository;
 
     private final QuizService quizService;
-    private final AnswersService answersService;
     private final QuestionService questionService;
-    private final OptionsService optionsService;
+    private final CurrentUserService currentUser;
 
     @Override
     @Transactional(readOnly = true)
     public List<Attempt> getAllAttempts() {
+        if (currentUser.isStudent()) {
+            return getAllAttemptsByStudent(currentUser.userId());
+        }
         return attemptRepository.findAll();
     }
 
@@ -57,7 +70,7 @@ public class AttemptsServiceImp implements AttemptsService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<Attempt> getAllAttemptsByStatus(CompletionStatus status) {
+    public List<Attempt> getAllAttemptsByStatus(AttemptStatus status) {
         return attemptRepository.findAllByStatus(status);
     }
 
@@ -76,69 +89,157 @@ public class AttemptsServiceImp implements AttemptsService {
 
     @Override
     @Transactional
-    public Attempt createAttempt(UUID quizId, UUID studentId) {
-        return attemptRepository
-                .save(Attempt.builder()
-                        .quiz(quizService.getQuizById(quizId))
-                        .studentId(studentId)
-                        .build());
+    public Attempt createNewAttempt(SaveAnswersDto request) {
+        return attemptRepository.save(Attempt.builder()
+                .studentId(currentUser.userId())
+                .quiz(quizService.getQuizById(request.quizId()))
+                .build());
     }
 
     @Override
     @Transactional
-    public Attempt saveAnswer(SaveAnswerDto request) {
-        Attempt attempt = getAttemptById(request.attemptId());
-        attempt.setTimeSpent(request.timeSpent());
+    public AttemptResponseDto<?> saveAnswers(SaveAnswersDto request) {
+        Attempt attempt = (request.attemptId() == null)
+                ? createNewAttempt(request)
+                : getAttemptById(request.attemptId());
 
-        Answer existingAnswer = answersService.getAnswerByAttemptAndQuestion(request.attemptId(), request.questionId());
-
-        if (Optional.ofNullable(existingAnswer).isEmpty()) {
-            Answer answer = Answer.builder()
-                    .attempt(attempt)
-                    .question(questionService.getQuestionById(request.questionId()))
-                    .selectedOption(optionsService.getOptionById(request.selectedOptionId()))
-                    .build();
-            answersService.createAnswer(answer);
-        } else {
-            existingAnswer.setSelectedOption(optionsService.getOptionById(request.selectedOptionId()));
-            answersService.createAnswer(existingAnswer);
+        if (!attempt.getStudentId().equals(currentUser.userId())) {
+            throw new ForbiddenQuizAttemptException("You are not allowed to answer this quiz attempt.");
+        }
+        if (attempt.getStatus().equals(AttemptStatus.SUBMITTED)
+                || attempt.getStatus().equals(AttemptStatus.AUTO_COMPLETED)) {
+            throw new QuizException("This quiz has been already submitted.");
         }
 
-        return attemptRepository.save(attempt);
+        // ? Update answers
+        updateAnswers(request, attempt);
+
+        // ? Updating timespent
+        Duration timeSpent = Duration.between(attempt.getAttemptTime(), LocalDateTime.now());
+        attempt.setTimeSpent(timeSpent);
+
+        Quiz quiz = attempt.getQuiz();
+        Duration maxDuration = quiz.getSettings().getMaxDuration();
+        if (maxDuration != null && (maxDuration.minus(timeSpent).isNegative() || maxDuration.equals(timeSpent))) {
+            attempt.setStatus(AttemptStatus.AUTO_COMPLETED);
+        } else {
+            attempt.setStatus(request.status());
+        }
+
+        if (attempt.getStatus().equals(AttemptStatus.SUBMITTED)
+                || attempt.getStatus().equals(AttemptStatus.AUTO_COMPLETED)) {
+            evaluateAttempt(attempt);
+        }
+
+        return mapAttemptToStudentResponse(attemptRepository.save(attempt));
     }
 
-    @Override
-    @Transactional
-    public Attempt autoSaveAnswers(AutoSaveRequestDto request) {
-        Attempt attempt;
+    private void updateAnswers(SaveAnswersDto request, Attempt attempt) {
+        List<Question> allQuestions = questionService.getAllQuestionsByIds(request.answers().stream()
+                .filter(a -> Optional.ofNullable(a.questionId()).isPresent())
+                .map(a -> a.questionId())
+                .toList());
 
-        if (Optional.ofNullable(request.attemptId()).isEmpty()) {
-            attempt = createAttempt(request.quizId(), null);
-        } else {
-            attempt = getAttemptById(request.attemptId());
-        }
-        attempt.setTimeSpent(request.timeSpent());
+        Map<Long, Question> questionsMap = allQuestions.stream()
+                .collect(Collectors.toMap(Question::getId, q -> q, (q1, q2) -> q1));
 
-        Map<Long, Answer> existingAnswersMap = answersService.getAllAnswersByAttempt(attempt).stream()
-                .collect(Collectors.toMap(a -> a.getQuestion().getId(), a -> a));
+        List<QuestionOption> allOptions = allQuestions.stream().flatMap(q -> q.getOptions().stream()).toList();
+        Map<Long, QuestionOption> optionsMap = allOptions.stream()
+                .collect(Collectors.toMap(QuestionOption::getId, op -> op, (op1, op2) -> op1));
 
-        request.answers().forEach((questionId, optionId) -> {
-            if (existingAnswersMap.containsKey(questionId)) {
-                // UPDATE existing entity
-                Answer existingAnswer = existingAnswersMap.get(questionId);
-                existingAnswer.setSelectedOption(optionsService.getOptionById(optionId));
+        Map<Long, Long> answeredMap = new HashMap<>();
+        Set<Long> unansweredQuestionIds = new HashSet<>();
+
+        // ? verify student answers
+        for (QuestionAnswersDto dto : request.answers()) {
+            if (dto.questionId() == null) {
+                throw new MalformedRequestException("Malformed Quiz Attempt Save Request Received!");
+            }
+            if (dto.answerId() != null) {
+                if (!optionsMap.containsKey(dto.answerId())) {
+                    throw new MalformedRequestException("Given Answer doesn't belong to this Quiz");
+                }
+                answeredMap.put(dto.questionId(), dto.answerId());
             } else {
-                // INSERT new entity
-                Answer newAnswer = new Answer();
-                newAnswer.setAttempt(attempt);
-                newAnswer.setQuestion(questionService.getQuestionById(questionId));
-                newAnswer.setSelectedOption(optionsService.getOptionById(optionId));
+                unansweredQuestionIds.add(dto.questionId());
+            }
+        }
 
-                attempt.getAnswers().add(newAnswer);
+        // ? Remove unAnswered
+        attempt.getAnswers().removeIf(a -> unansweredQuestionIds.contains(a.getQuestion().getId()));
+
+        // ? Update existing answers and add new answers
+        Map<Long, Answer> existingAnswersMap = attempt.getAnswers().stream()
+                .collect(Collectors.toMap(a -> a.getQuestion().getId(), a -> a, (a1, a2) -> a1));
+
+        answeredMap.forEach((questionId, optionId) -> {
+            Answer existingAnswer = existingAnswersMap.get(questionId);
+            if (existingAnswer != null) {
+                existingAnswer.setSelectedOption(optionsMap.get(optionId));
+            } else {
+                attempt.getAnswers().add(Answer.builder()
+                        .attempt(attempt)
+                        .question(questionsMap.get(questionId))
+                        .selectedOption(optionsMap.get(optionId))
+                        .build());
             }
         });
-
-        return attemptRepository.save(attempt);
     }
 
+    @Override
+    public AttemptResponseDto<?> mapAttemptToStudentResponse(Attempt attempt) {
+        return AttemptResponseDto.builder()
+                .id(attempt.getId())
+                .studentId(attempt.getStudentId())
+                .quiz(quizService.mapQuizResponse(attempt.getQuiz()))
+                .score(attempt.getScore())
+                .percentage(attempt.getPercentage())
+                .correctAnswers(attempt.getCorrectAnswers())
+                .unAnswered(attempt.getUnAnswered())
+                .answers(attempt.getAnswers().stream().map(ans -> AnswerDto.builder()
+                        .id(ans.getId())
+                        .questionId(ans.getQuestion().getId())
+                        .selectedOptionId(ans.getSelectedOption().getId())
+                        .isCorrect(ans.getIsCorrect())
+                        .build()).collect(Collectors.toSet()))
+                .timeSpent(attempt.getTimeSpent())
+                .status(attempt.getStatus())
+                .attemptTime(attempt.getAttemptTime())
+                .build();
+    }
+
+    @Override
+    public AttemptResponseDto<?> evaluateAttempt(Attempt attempt) {
+
+        int totalScore = Optional.ofNullable(attempt.getQuiz().getQuestions())
+                .orElseGet(Collections::emptySet)
+                .stream()
+                .mapToInt(Question::getMarks)
+                .sum();
+
+        List<Answer> correctAnswers = Optional.ofNullable(attempt.getAnswers())
+                .orElseGet(Collections::emptySet)
+                .stream()
+                .filter(answer -> answer.getSelectedOption() != null
+                        && Boolean.TRUE.equals(answer.getSelectedOption().getIsCorrect()))
+                .toList();
+
+        int attemptScore = correctAnswers.stream()
+                .mapToInt(answer -> answer.getQuestion().getMarks())
+                .sum();
+
+        int totalQuestions = attempt.getQuiz().getQuestions().size();
+        long answeredCount = Optional.ofNullable(attempt.getAnswers())
+                .orElseGet(Collections::emptySet)
+                .stream()
+                .filter(answer -> answer.getSelectedOption() != null)
+                .count();
+
+        attempt.setScore(attemptScore);
+        attempt.setPercentage(totalScore > 0 ? ((double) attemptScore / totalScore) * 100.0 : 0.0);
+        attempt.setCorrectAnswers(correctAnswers.size());
+        attempt.setUnAnswered((int) (totalQuestions - answeredCount));
+
+        return mapAttemptToStudentResponse(attempt);
+    }
 }

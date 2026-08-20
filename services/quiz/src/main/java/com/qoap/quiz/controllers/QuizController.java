@@ -19,6 +19,7 @@ import com.qoap.quiz.dto.APIResponseDto;
 import com.qoap.quiz.dto.CreateQuizRequestDto;
 import com.qoap.quiz.dto.UpdateQuizRequestDto;
 import com.qoap.quiz.dto.UpdateQuizStatusDto;
+import com.qoap.quiz.services.CurrentUserService;
 import com.qoap.quiz.services.QuizService;
 
 import lombok.RequiredArgsConstructor;
@@ -29,34 +30,54 @@ import lombok.RequiredArgsConstructor;
 public class QuizController {
 
     private final QuizService quizService;
+    private final CurrentUserService currentUser;
 
     @GetMapping("/")
     public ResponseEntity<APIResponseDto> getAllQuizzes() {
-        return ResponseEntity.ok().body(APIResponseDto.builder().data(quizService.getAllQuizzes()).build());
+        if (currentUser.isAdmin())
+            return ResponseEntity.ok().body(APIResponseDto.builder().data(quizService.getAllQuizzes()).build());
+        else
+            return ResponseEntity.ok().body(APIResponseDto.builder()
+                    .data(quizService.getAllQuizzes().stream().map(q -> quizService.mapQuizResponse(q))).build());
     }
 
     @GetMapping("/{quizId}")
     public ResponseEntity<APIResponseDto> getQuizById(@PathVariable UUID quizId) {
-        return ResponseEntity.ok().body(APIResponseDto.builder().data(quizService.getQuizById(quizId)).build());
+        if (currentUser.isAdmin()) {
+            return ResponseEntity.ok().body(APIResponseDto.builder().data(quizService.getQuizById(quizId)).build());
+        } else {
+            return ResponseEntity.ok().body(APIResponseDto.builder()
+                    .data(quizService.mapQuizResponse(quizService.getQuizById(quizId))).build());
+        }
     }
 
     @GetMapping("/title/{title}")
     public ResponseEntity<APIResponseDto> getAllQuizzesByTitle(@PathVariable String title) {
-        return ResponseEntity.ok().body(APIResponseDto.builder().data(quizService.getAllQuizzesByTitle(title)).build());
+        if (currentUser.isAdmin())
+            return ResponseEntity.ok()
+                    .body(APIResponseDto.builder().data(quizService.getAllQuizzesByTitle(title)).build());
+        else
+            return ResponseEntity.ok()
+                    .body(APIResponseDto.builder().data(
+                            quizService.getAllQuizzesByTitle(title).stream().map(q -> quizService.mapQuizResponse(q)))
+                            .build());
     }
 
     @PostMapping("/")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<APIResponseDto> createQuiz(@RequestBody CreateQuizRequestDto quiz) {
         return ResponseEntity.ok().body(APIResponseDto.builder().data(quizService.createQuiz(quiz)).build());
     }
 
     @PutMapping("/{quizId}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<APIResponseDto> updateQuiz(@PathVariable UUID quizId,
             @RequestBody UpdateQuizRequestDto quiz) {
         return ResponseEntity.ok().body(APIResponseDto.builder().data(quizService.updateQuiz(quizId, quiz)).build());
     }
 
     @PatchMapping("/{quizId}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<APIResponseDto> updateQuizStatus(@PathVariable UUID quizId,
             @RequestBody UpdateQuizStatusDto request) {
         return ResponseEntity.ok()
@@ -64,6 +85,7 @@ public class QuizController {
     }
 
     @DeleteMapping("/{quizId}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<APIResponseDto> deleteQuiz(@PathVariable UUID quizId) {
         return ResponseEntity.ok()
                 .body(APIResponseDto.builder().data(quizService.deleteQuiz(quizId)).build());
