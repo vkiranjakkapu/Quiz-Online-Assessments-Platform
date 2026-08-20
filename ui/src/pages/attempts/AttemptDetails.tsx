@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import AttemptInfoCard from "../../components/AttemptInfoCard";
+import QuizInfoCard from "../../components/quiz/QuizInfoCard";
 import SectionLayout from "../../components/SectionLayout";
 import SpinnerComponent from "../../components/SpinnerComponent";
 import { RoutePaths } from "../../routes/RoutePaths";
 import type { Attempt } from "../../services/AttemptService";
 import AttemptService from "../../services/AttemptService";
-import QuizInfoCard from "../../components/quiz/QuizInfoCard";
+import LeaderBoard from "../leaderboard/LeaderBoard";
 
 export default function AttemptDetails() {
     const { attemptId } = useParams<{ attemptId: string }>();
@@ -48,7 +50,10 @@ export default function AttemptDetails() {
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <QuizInfoCard quiz={attempt.quiz} showAttempt={false} />
-                    <QuizInfoCard quiz={attempt.quiz} showAttempt={false} />
+                    <AttemptInfoCard attempt={attempt} />
+                    <div className="col-span-full">
+                        <LeaderBoard quiz={attempt.quiz} />
+                    </div>
                 </div>
             )}
         </SectionLayout>

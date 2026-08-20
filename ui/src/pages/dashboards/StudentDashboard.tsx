@@ -1,5 +1,3 @@
-import LeaderBoard from "../leaderboard/LeaderBoard";
-
 export default function StudentDashboard() {
-    return <LeaderBoard />;
+    return <h1>Student Dashboard</h1>;
 }

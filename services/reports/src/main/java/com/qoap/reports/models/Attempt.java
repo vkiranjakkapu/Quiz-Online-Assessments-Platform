@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
 
-import com.qoap.reports.enums.CompletionStatus;
+import com.qoap.reports.enums.AttemptStatus;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,7 +26,7 @@ public class Attempt {
 
     private Quiz quiz;
 
-    private Double score;
+    private Integer score;
 
     private Double percentage;
 
@@ -38,7 +38,7 @@ public class Attempt {
 
     private Duration timeSpent;
 
-    private CompletionStatus status;
+    private AttemptStatus status;
 
     private LocalDateTime attemptTime;
 

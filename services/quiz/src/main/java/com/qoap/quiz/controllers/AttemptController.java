@@ -72,6 +72,7 @@ public class AttemptController {
     }
 
     @PostMapping("/quiz")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<APIResponseDto> getAllAttemptsByQuizIds(@RequestBody Set<UUID> quizIds) {
         return ResponseEntity
                 .ok(APIResponseDto.builder().data(attemptsService.getAllAttemptsByQuizIds(quizIds)).build());
