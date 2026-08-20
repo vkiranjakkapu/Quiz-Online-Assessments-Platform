@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { type AxiosRequestConfig } from "axios";
 import { AppConfig } from "../config/AppConfig";
 import { handleErrorResponse } from "../utils/ErrorHandler";
 import configureRequestInterceptor from "./RequestInterceptor";
@@ -33,6 +33,7 @@ export type ApiClientProps = {
     uri: string;
     service: "identity" | "profile" | "quiz" | "attempts" | "reports";
     payload?: unknown;
+    config?: AxiosRequestConfig<unknown, unknown>;
 };
 
 export async function apiClient<T>({
@@ -40,6 +41,7 @@ export async function apiClient<T>({
     uri,
     service,
     payload,
+    config,
 }: ApiClientProps): Promise<T | ErrorResponse> {
     try {
         let response, url;
@@ -57,7 +59,7 @@ export async function apiClient<T>({
         }
 
         if (type.toLowerCase() == "post") {
-            response = await api.post(url + uri, payload);
+            response = await api.post(url + uri, payload, config);
         } else if (type.toLowerCase() == "put") {
             response = await api.put(url + uri, payload);
         } else if (type.toLowerCase() == "patch") {

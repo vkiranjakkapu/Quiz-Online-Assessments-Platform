@@ -41,6 +41,7 @@ import { SelectComponent } from "../../components/form/SelectComponent";
 import { RoleType } from "../../context/usePrincipal";
 import type { NotificationProps } from "../../components/Notification";
 import Notification from "../../components/Notification";
+import SpinnerComponent from "../../components/SpinnerComponent";
 
 type AllNotifications = {
     user: NotificationProps;
@@ -497,10 +498,7 @@ export default function Users() {
                     </>
                 )}
                 {dataFetchProgress ? (
-                    <div className="inline-flex items-center gap-2 justify-center w-full">
-                        <div className="h-4 w-4 border-2 border-slate-300 border-t-primary animate-spin rounded-full"></div>
-                        <h1 className="animate-pulse">Fetching Users...</h1>
-                    </div>
+                    <SpinnerComponent text="Fetching Users..." />
                 ) : currentUsers.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-3">
                         {currentUsers.map((cardData, idx) => (

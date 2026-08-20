@@ -1,3 +1,4 @@
+import type { AxiosRequestConfig } from "axios";
 import { apiClient, type ErrorResponse } from "../api/api";
 import type { Question, QuestionOption, Quiz } from "./QuizService";
 
@@ -8,6 +9,39 @@ class AttemptService {
             service: "attempts",
             uri: "/save",
             payload,
+        });
+    }
+
+    async getAttemptById<T>(attemptId: string): Promise<T | ErrorResponse> {
+        return apiClient({
+            type: "get",
+            service: "attempts",
+            uri: "/" + attemptId,
+        });
+    }
+
+    async getPreviousAttempts<T>(quizId?: string): Promise<T | ErrorResponse> {
+        return apiClient({
+            type: "get",
+            service: "attempts",
+            uri: quizId ? "/quiz/" + quizId : "/",
+        });
+    }
+
+    /**
+     * Sends a background HTTP request that survives page unloads and tab closures
+     * using Axios with native fetch adapter + keepalive.
+     */
+    async markQuizInterrupted(payload: unknown) {
+        return apiClient({
+            type: "post",
+            service: "attempts",
+            uri: "/save",
+            payload,
+            config: {
+                adapter: "fetch",
+                keepalive: true,
+            } as AxiosRequestConfig,
         });
     }
 }
@@ -52,7 +86,7 @@ export const AttemptStatus = {
     IN_PROGRESS: "IN_PROGRESS",
     INTERUPTED: "INTERUPTED",
     SUBMITTED: "SUBMITTED",
-    COMPLETED: "COMPLETED",
+    AUTO_COMPLETED: "AUTO_COMPLETED",
 } as const;
 
 export type AttemptStatus = (typeof AttemptStatus)[keyof typeof AttemptStatus];

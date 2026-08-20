@@ -6,6 +6,7 @@ import {
     HomeIcon,
     ListBulletIcon,
     MoonIcon,
+    SparklesIcon,
     Square2StackIcon,
     SunIcon,
     UserCircleIcon,
@@ -77,7 +78,13 @@ export default function Navbar({
             text: "Attempts",
             icon: Square2StackIcon,
             path: RoutePaths.ATTEMPTS,
-            roles: ["ADMIN", "STUDENT"],
+            roles: ["ADMIN"],
+        },
+        {
+            text: "Leaderboard",
+            icon: SparklesIcon,
+            path: RoutePaths.LEADERBOARD,
+            roles: ["STUDENT"],
         },
         {
             text: "Users",

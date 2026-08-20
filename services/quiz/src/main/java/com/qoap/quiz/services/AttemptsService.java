@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import com.qoap.quiz.dto.AttemptResponseDto;
 import com.qoap.quiz.dto.SaveAnswersDto;
 import com.qoap.quiz.enums.AttemptStatus;
 import com.qoap.quiz.models.Attempt;
@@ -22,8 +23,12 @@ public interface AttemptsService {
 
     List<Attempt> getAllAttemptsByStudent(UUID studentId);
 
-    Attempt createAttempt(UUID quizId, UUID studentId);
+    Attempt createNewAttempt(SaveAnswersDto request);
 
-    Attempt saveAnswers(SaveAnswersDto request);
+    AttemptResponseDto<?> saveAnswers(SaveAnswersDto request);
+
+    AttemptResponseDto<?> evaluateAttempt(Attempt attempt);
+
+    AttemptResponseDto<?> mapAttemptToStudentResponse(Attempt attempt);
 
 }

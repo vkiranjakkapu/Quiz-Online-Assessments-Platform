@@ -5,7 +5,7 @@ import ActionButton, { type ActionButtonProps } from "./button/ActionButton";
 export type SectionLayoutProps = {
     children: ReactNode;
     title?: string;
-    breadCrumbs?: { text: string; uri: string }[];
+    breadCrumbs?: { text: string; uri?: string }[];
     description?: string;
     actionButtons?: ActionButtonProps[];
 };
@@ -36,7 +36,9 @@ export default function SectionLayout({
                                                   <a
                                                       key={idx}
                                                       onClick={() => {
-                                                          navigate(path.uri);
+                                                          navigate(
+                                                              path.uri ?? "#",
+                                                          );
                                                       }}
                                                       className={`text-secondary cursor-pointer transition-colors duration-75 capitalize ${
                                                           isLast

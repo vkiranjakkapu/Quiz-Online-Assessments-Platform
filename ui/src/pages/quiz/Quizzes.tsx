@@ -54,6 +54,7 @@ import QuizService, {
     type Quiz,
 } from "../../services/QuizService";
 import QuizCard from "./QuizCard";
+import SpinnerComponent from "../../components/SpinnerComponent";
 
 type AllNotifications = {
     form: NotificationProps;
@@ -1422,10 +1423,7 @@ export default function Quizzes() {
             </ModalComponent>
 
             {loadingStatus ? (
-                <div className="text-semibold inline-flex gap-2 items-center">
-                    <div className="h-5 w-5 border-2 border-slate-300 border-t-primary rounded-full animate-spin"></div>
-                    <span>Fetching Quizzes...</span>
-                </div>
+                <SpinnerComponent text="Fetching Quizzes..." />
             ) : allQuizzes.length > 0 ? (
                 <>
                     <div className="space-y-4">

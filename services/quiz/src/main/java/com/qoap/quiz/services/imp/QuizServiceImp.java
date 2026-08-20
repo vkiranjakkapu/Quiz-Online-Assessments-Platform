@@ -98,6 +98,7 @@ public class QuizServiceImp implements QuizService {
                         .options(q.getOptions().stream().map(op -> StudentOptionResponseDto.builder()
                                 .id(op.getId())
                                 .optionText(op.getOptionText())
+                                .createdAt(op.getCreatedAt())
                                 .build())
                                 .collect(Collectors.toSet()))
                         .build())

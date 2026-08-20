@@ -2,6 +2,7 @@ package com.qoap.quiz.services.imp;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -14,6 +15,8 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.qoap.quiz.dto.AnswerDto;
+import com.qoap.quiz.dto.AttemptResponseDto;
 import com.qoap.quiz.dto.QuestionAnswersDto;
 import com.qoap.quiz.dto.SaveAnswersDto;
 import com.qoap.quiz.enums.AttemptStatus;
@@ -47,6 +50,9 @@ public class AttemptsServiceImp implements AttemptsService {
     @Override
     @Transactional(readOnly = true)
     public List<Attempt> getAllAttempts() {
+        if (currentUser.isStudent()) {
+            return getAllAttemptsByStudent(currentUser.userId());
+        }
         return attemptRepository.findAll();
     }
 
@@ -83,17 +89,16 @@ public class AttemptsServiceImp implements AttemptsService {
 
     @Override
     @Transactional
-    public Attempt createAttempt(UUID quizId, UUID studentId) {
-        return attemptRepository
-                .save(Attempt.builder()
-                        .quiz(quizService.getQuizById(quizId))
-                        .studentId(studentId)
-                        .build());
+    public Attempt createNewAttempt(SaveAnswersDto request) {
+        return attemptRepository.save(Attempt.builder()
+                .studentId(currentUser.userId())
+                .quiz(quizService.getQuizById(request.quizId()))
+                .build());
     }
 
     @Override
     @Transactional
-    public Attempt saveAnswers(SaveAnswersDto request) {
+    public AttemptResponseDto<?> saveAnswers(SaveAnswersDto request) {
         Attempt attempt = (request.attemptId() == null)
                 ? createNewAttempt(request)
                 : getAttemptById(request.attemptId());
@@ -121,14 +126,12 @@ public class AttemptsServiceImp implements AttemptsService {
             attempt.setStatus(request.status());
         }
 
-        return attemptRepository.save(attempt);
-    }
+        if (attempt.getStatus().equals(AttemptStatus.SUBMITTED)
+                || attempt.getStatus().equals(AttemptStatus.AUTO_COMPLETED)) {
+            evaluateAttempt(attempt);
+        }
 
-    private Attempt createNewAttempt(SaveAnswersDto request) {
-        return attemptRepository.save(Attempt.builder()
-                .studentId(currentUser.userId())
-                .quiz(quizService.getQuizById(request.quizId()))
-                .build());
+        return mapAttemptToStudentResponse(attemptRepository.save(attempt));
     }
 
     private void updateAnswers(SaveAnswersDto request, Attempt attempt) {
@@ -183,4 +186,60 @@ public class AttemptsServiceImp implements AttemptsService {
         });
     }
 
+    @Override
+    public AttemptResponseDto<?> mapAttemptToStudentResponse(Attempt attempt) {
+        return AttemptResponseDto.builder()
+                .id(attempt.getId())
+                .studentId(attempt.getStudentId())
+                .quiz(quizService.mapQuizResponse(attempt.getQuiz()))
+                .score(attempt.getScore())
+                .percentage(attempt.getPercentage())
+                .correctAnswers(attempt.getCorrectAnswers())
+                .unAnswered(attempt.getUnAnswered())
+                .answers(attempt.getAnswers().stream().map(ans -> AnswerDto.builder()
+                        .id(ans.getId())
+                        .questionId(ans.getQuestion().getId())
+                        .selectedOptionId(ans.getSelectedOption().getId())
+                        .isCorrect(ans.getIsCorrect())
+                        .build()).collect(Collectors.toSet()))
+                .timeSpent(attempt.getTimeSpent())
+                .status(attempt.getStatus())
+                .attemptTime(attempt.getAttemptTime())
+                .build();
+    }
+
+    @Override
+    public AttemptResponseDto<?> evaluateAttempt(Attempt attempt) {
+
+        int totalScore = Optional.ofNullable(attempt.getQuiz().getQuestions())
+                .orElseGet(Collections::emptySet)
+                .stream()
+                .mapToInt(Question::getMarks)
+                .sum();
+
+        List<Answer> correctAnswers = Optional.ofNullable(attempt.getAnswers())
+                .orElseGet(Collections::emptySet)
+                .stream()
+                .filter(answer -> answer.getSelectedOption() != null
+                        && Boolean.TRUE.equals(answer.getSelectedOption().getIsCorrect()))
+                .toList();
+
+        int attemptScore = correctAnswers.stream()
+                .mapToInt(answer -> answer.getQuestion().getMarks())
+                .sum();
+
+        int totalQuestions = attempt.getQuiz().getQuestions().size();
+        long answeredCount = Optional.ofNullable(attempt.getAnswers())
+                .orElseGet(Collections::emptySet)
+                .stream()
+                .filter(answer -> answer.getSelectedOption() != null)
+                .count();
+
+        attempt.setScore(attemptScore);
+        attempt.setPercentage(totalScore > 0 ? ((double) attemptScore / totalScore) * 100.0 : 0.0);
+        attempt.setCorrectAnswers(correctAnswers.size());
+        attempt.setUnAnswered((int) (totalQuestions - answeredCount));
+
+        return mapAttemptToStudentResponse(attempt);
+    }
 }

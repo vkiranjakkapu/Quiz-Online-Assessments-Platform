@@ -11,30 +11,34 @@ import {
 import {
     useCallback,
     useEffect,
+    useMemo,
     useRef,
     useState,
     type SetStateAction,
 } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import BadgeComponent from "../../components/BadgeComponent";
-import ActionButton from "../../components/button/ActionButton";
-import type { NotificationProps } from "../../components/Notification";
-import Notification from "../../components/Notification";
-import SectionLayout from "../../components/SectionLayout";
-import useProfile from "../../context/useProfile";
-import { RoutePaths } from "../../routes/RoutePaths";
+import BadgeComponent from "../../../components/BadgeComponent";
+import ActionButton from "../../../components/button/ActionButton";
+import type { NotificationProps } from "../../../components/Notification";
+import Notification from "../../../components/Notification";
+import SectionLayout from "../../../components/SectionLayout";
+import SpinnerComponent from "../../../components/SpinnerComponent";
+import useProfile from "../../../context/useProfile";
+import { RoutePaths } from "../../../routes/RoutePaths";
 import AttemptService, {
     AttemptStatus,
     SaveProgress,
     type Attempt,
     type AttemptProgress,
-} from "../../services/AttemptService";
-import type { Question, Quiz } from "../../services/QuizService";
-import QuizService from "../../services/QuizService";
+    type QuizAnswers,
+} from "../../../services/AttemptService";
+import type { Question, Quiz } from "../../../services/QuizService";
+import QuizService from "../../../services/QuizService";
 import {
     formatSecondsToDisplay,
     parseIsoDurationToSeconds,
-} from "../../utils/DurationParseHelper";
+} from "../../../utils/DateTimeParseHelper";
+import { useQuizGuard } from "./useQuizGaurd";
 
 type AllNotifications = {
     attempt: NotificationProps;
@@ -45,14 +49,39 @@ export default function QuizAttempt() {
     const { profile } = useProfile();
     const navigate = useNavigate();
 
+    const [pageLoadStatus, setPageLoadStatus] = useState<boolean>(true);
+    const [movingToResults, setMovingToResults] = useState<number | null>(null);
+    const [attemptIdForRedirect, setAttemptIdForRedirect] = useState<
+        number | string | null
+    >(null);
+
     const [quiz, setQuiz] = useState<Quiz | null>(null);
 
     const [startCountDown, setStartCountDown] = useState<number | null>(null);
     const [attemptInProgress, setAttemptInProgress] = useState<boolean>(false);
     const quizStartedRef = useRef(false);
+
+    const [prevAttempts, setPrevAttempts] = useState<Attempt[]>([]);
+
+    const interruptedAttempt = useMemo(() => {
+        return (
+            prevAttempts
+                .sort((a, b) => b.id - a.id)
+                .find(
+                    (atm) =>
+                        atm.status === AttemptStatus.INTERUPTED ||
+                        atm.status === AttemptStatus.IN_PROGRESS,
+                ) ?? null
+        );
+    }, [prevAttempts]);
+
     const [attempt, setAttempt] = useState<AttemptProgress>(
         {} as AttemptProgress,
     );
+    const attemptRef = useRef(attempt);
+    useEffect(() => {
+        attemptRef.current = attempt;
+    }, [attempt]);
 
     const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(
         null,
@@ -76,7 +105,6 @@ export default function QuizAttempt() {
 
     const [notifications, updateNotifications] =
         useState<AllNotifications | null>({} as AllNotifications);
-
     function setNotifications<K extends keyof AllNotifications>(
         belongs: K,
         value: SetStateAction<NotificationProps>,
@@ -100,6 +128,87 @@ export default function QuizAttempt() {
         });
     }
 
+    // * End & Reset Attempt
+    const endQuiz = useCallback((completedAttemptId?: number | string) => {
+        // Set success notification
+        setNotifications("attempt", {
+            type: "success",
+            messages: [`Quiz has been submitted successfully.`],
+        });
+
+        // Save target attemptId into a ref or local state before clearing attempt
+        const targetId = completedAttemptId || attemptRef.current.attemptId;
+
+        // Clear active attempt progress states
+        setAttemptInProgress(false);
+        quizStartedRef.current = false;
+        setStartCountDown(null);
+        setAttempt({} as AttemptProgress);
+
+        // Start 5-second redirect countdown state
+        setMovingToResults(5);
+
+        // Store target attemptId for redirect effect
+        if (targetId) {
+            setAttemptIdForRedirect(targetId);
+        }
+    }, []);
+
+    // * Timer effect for navigation
+    useEffect(() => {
+        if (movingToResults === null) return;
+
+        if (movingToResults <= 0) {
+            if (attemptIdForRedirect) {
+                navigate(
+                    RoutePaths.ATTEMPT_DETAILS.replace(
+                        ":attemptId",
+                        String(attemptIdForRedirect),
+                    ),
+                );
+            }
+            return;
+        }
+
+        const timer = setInterval(() => {
+            setMovingToResults((prev) =>
+                prev !== null && prev > 0 ? prev - 1 : 0,
+            );
+        }, 1000);
+
+        return () => clearInterval(timer);
+    }, [movingToResults, attemptIdForRedirect, navigate]);
+
+    // * Loading page data
+    useEffect(() => {
+        let quiz = {} as Quiz;
+
+        QuizService.getQuizById<Quiz>(quizId ?? "").then((resp) => {
+            if (resp && !("errorMessage" in resp)) {
+                quiz = resp;
+                setQuiz(quiz);
+                setPageLoadStatus(false);
+            }
+        });
+
+        AttemptService.getPreviousAttempts<Attempt[]>(quizId ?? "").then(
+            (resp) => {
+                if (resp && !("errorMessage" in resp)) {
+                    setPrevAttempts(resp);
+                    if (resp.length > Number(quiz.settings?.maxAttempts)) {
+                        setNotifications("attempt", {
+                            type: "error",
+                            messages: [
+                                `You dont have any attempts left for this quiz. [Attempts: (${quiz.settings?.maxAttempts}/${quiz.settings?.maxAttempts})].`,
+                            ],
+                        });
+                    }
+                }
+            },
+        );
+    }, [quizId]);
+
+    // * Save Quiz Progress in backend
     const saveQuizProgress = useCallback(
         ({ payload }: { payload: AttemptProgress }) => {
             setSaveProgressStatus(SaveProgress.SAVING);
@@ -107,11 +216,23 @@ export default function QuizAttempt() {
             AttemptService.saveQuizProgress<Attempt>(payload).then((resp) => {
                 if (resp && !("errorMessage" in resp)) {
                     setSaveProgressStatus(SaveProgress.SAVED);
+
+                    if (
+                        [
+                            AttemptStatus.SUBMITTED.toString(),
+                            AttemptStatus.AUTO_COMPLETED.toString(),
+                        ].includes(resp.status)
+                    ) {
+                        endQuiz(resp.id);
+                        return;
+                    }
+
                     setAttempt((prev) => ({ ...prev, attemptId: resp.id }));
+                    updateNotifications(null);
                 } else {
                     setSaveProgressStatus(SaveProgress.UN_SAVED);
                     setNotifications("attempt", {
-                        type: "error",
+                        type: "info",
                         messages:
                             resp.validationErrors &&
                             resp.validationErrors.length > 0
@@ -120,40 +241,128 @@ export default function QuizAttempt() {
                                           (ve) => `${ve.field} ${ve.message}`,
                                       ),
                                   ]
-                                : [resp.errorMessage],
+                                : ["Retrying progress save."],
                     });
                 }
             });
         },
-        [],
+        [endQuiz],
     );
 
-    const beginQuiz = useCallback(() => {
-        if (!quiz) return;
+    // * Begin Quiz
+    const beginQuiz = useCallback(
+        (attempt?: Attempt) => {
+            if (!quiz) return;
+            setStartCountDown(null);
 
-        const initialAttempt: AttemptProgress = {
-            studentId: profile?.id ?? "",
-            quizId: quizId ?? "",
-            answers: (quiz.questions ?? []).map((question) => ({
-                questionId: Number(question.id),
-                answerId: null,
-            })),
-            status: AttemptStatus.IN_PROGRESS,
-        };
+            if (
+                attempt &&
+                [
+                    AttemptStatus.SUBMITTED.toString(),
+                    AttemptStatus.AUTO_COMPLETED.toString(),
+                ].includes(attempt.status)
+            ) {
+                setNotifications("attempt", {
+                    type: "error",
+                    messages: ["This quiz has already been submitted!"],
+                });
+                endQuiz(attempt.id);
+                return false;
+            }
 
-        setAttemptInProgress(true);
-        setAttempt(initialAttempt);
-        setSelectedQuestion((quiz.questions ?? [])[0]);
-        const totalSecs = parseIsoDurationToSeconds(
-            quiz?.settings?.maxDuration,
-        );
-        setTimeLeftInSeconds(totalSecs);
+            const emptyAnswers = (quiz.questions ?? []).map(
+                (question) =>
+                    ({
+                        questionId: Number(question.id),
+                        answerId: null,
+                    }) as QuizAnswers,
+            );
 
-        saveQuizProgress({ payload: initialAttempt });
-    }, [quiz, profile?.id, quizId, saveQuizProgress]);
+            const initialAttempt = attempt
+                ? ({
+                      attemptId: attempt.id,
+                      quizId: attempt.quiz.id,
+                      answers:
+                          attempt.answers.length != 0
+                              ? [
+                                    ...emptyAnswers,
+                                    ...attempt.answers.map(
+                                        (ans) =>
+                                            ({
+                                                questionId: Number(
+                                                    ans.question.id,
+                                                ),
+                                                answerId: Number(
+                                                    ans.selectedOption.id,
+                                                ),
+                                            }) as QuizAnswers,
+                                    ),
+                                ]
+                              : emptyAnswers,
+                      status: AttemptStatus.IN_PROGRESS,
+                  } as AttemptProgress)
+                : ({
+                      studentId: profile?.id ?? "",
+                      quizId: quizId ?? "",
+                      answers: emptyAnswers,
+                      status: AttemptStatus.IN_PROGRESS,
+                  } as AttemptProgress);
 
+            saveQuizProgress({ payload: initialAttempt });
+            setAttemptInProgress(true);
+            setAttempt(initialAttempt);
+            setSelectedQuestion((quiz.questions ?? [])[0]);
+            // * Timer
+            const totalSecs =
+                parseIsoDurationToSeconds(quiz?.settings?.maxDuration) -
+                (interruptedAttempt !== null
+                    ? parseIsoDurationToSeconds(interruptedAttempt.timeSpent)
+                    : 0);
+            setTimeLeftInSeconds(totalSecs);
+        },
+        [
+            quiz,
+            profile?.id,
+            quizId,
+            interruptedAttempt,
+            saveQuizProgress,
+            endQuiz,
+        ],
+    );
+
+    // * Auto-Submit
     useEffect(() => {
-        if (startCountDown === null) return;
+        if (!attemptInProgress || timeLeftInSeconds !== 0) return;
+
+        saveQuizProgress({
+            payload: {
+                ...attemptRef.current,
+                status: AttemptStatus.AUTO_COMPLETED,
+            },
+        });
+    }, [attemptInProgress, timeLeftInSeconds, saveQuizProgress]);
+
+    // * Manual Submit Quiz
+    const submitQuiz = useCallback(() => {
+        saveQuizProgress({
+            payload: {
+                ...attemptRef.current,
+                status: AttemptStatus.SUBMITTED,
+            },
+        });
+    }, [saveQuizProgress]);
+
+    // * Interruption Handling
+    useQuizGuard(attempt, attemptInProgress);
+
+    // * Start countdown
+    useEffect(() => {
+        if (
+            startCountDown === null ||
+            attemptInProgress ||
+            quizStartedRef.current
+        )
+            return;
 
         const countdownInterval = setInterval(() => {
             setStartCountDown((prev) => {
@@ -164,7 +373,12 @@ export default function QuizAttempt() {
 
                     if (!quizStartedRef.current) {
                         quizStartedRef.current = true;
-                        beginQuiz();
+
+                        if (interruptedAttempt) {
+                            beginQuiz(interruptedAttempt);
+                        } else {
+                            beginQuiz();
+                        }
                     }
                     return 0;
                 }
@@ -174,32 +388,42 @@ export default function QuizAttempt() {
         }, 1000);
 
         return () => clearInterval(countdownInterval);
-    }, [startCountDown, quiz?.settings?.maxDuration, beginQuiz]);
+    }, [
+        startCountDown,
+        attemptInProgress,
+        quiz?.settings?.maxDuration,
+        prevAttempts,
+        interruptedAttempt,
+        beginQuiz,
+    ]);
 
+    // * Timer
     useEffect(() => {
-        if (!attemptInProgress || timeLeftInSeconds === null) return;
+        if (!attemptInProgress) return;
 
-        if (timeLeftInSeconds <= 0) {
-            // Optional: Trigger auto-submit when timer reaches zero
-            return;
-        }
-
-        const timerInterval = setInterval(() => {
+        const interval = setInterval(() => {
             setTimeLeftInSeconds((prev) =>
                 prev !== null && prev > 0 ? prev - 1 : 0,
             );
         }, 1000);
 
-        return () => clearInterval(timerInterval);
-    }, [attemptInProgress, timeLeftInSeconds]);
+        return () => clearInterval(interval);
+    }, [attemptInProgress]);
 
+    // * Auto-save
     useEffect(() => {
-        QuizService.getQuizById<Quiz>(quizId ?? "").then((resp) => {
-            if (resp && !("errorMessage" in resp)) {
-                setQuiz(resp);
-            }
-        });
-    }, [quizId]);
+        if (!attemptInProgress) return;
+
+        const interval = setInterval(() => {
+            const payload = {
+                ...attemptRef.current,
+                status: AttemptStatus.IN_PROGRESS,
+            } as AttemptProgress;
+            saveQuizProgress({ payload });
+        }, 5000);
+
+        return () => clearInterval(interval);
+    }, [attemptInProgress, saveQuizProgress]);
 
     const handleQuestionClick = (questionId: number) => {
         const foundQuestion = questionsList.find(
@@ -258,8 +482,8 @@ export default function QuizAttempt() {
                     {attemptInProgress && (
                         <div className="space-x-2 flex">
                             <BadgeComponent
-                                type="info"
-                                value={`${saveProgressStatus === SaveProgress.SAVING ? SaveProgress.SAVING + "..." : SaveProgress.SAVED}`}
+                                type={`${saveProgressStatus === SaveProgress.SAVING ? "warning" : "info"}`}
+                                value={`${saveProgressStatus === SaveProgress.SAVING ? SaveProgress.SAVING + "..." : saveProgressStatus}`}
                                 icon={CloudArrowUpIcon}
                                 customize={`${saveProgressStatus === SaveProgress.SAVING ? "animate-pulse" : ""}`}
                             />
@@ -268,6 +492,7 @@ export default function QuizAttempt() {
                                 theme="secondary"
                                 text="Submit"
                                 padding="rounded-sm text-sm py-1 px-1.5"
+                                onClick={submitQuiz}
                             />
                         </div>
                     )}
@@ -287,27 +512,97 @@ export default function QuizAttempt() {
                     />
                 )}
                 {!attemptInProgress ? (
-                    <div className="space-y-2 bg-white border border-slate-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg p-3 shadow-sm">
-                        <h4 className="font-semibold">Note:</h4>
-                        <ul className="text-sm list-disc list-inside space-y-2">
-                            <li>
-                                Quiz Will be auto-submitted after{" "}
-                                {quiz?.settings?.maxDuration?.substring(2)}
-                            </li>
-                            <li>Keep an eye on the timer while you answer</li>
-                            <li>All the best!</li>
-                        </ul>
-                        <ActionButton
-                            icon={SquaresPlusIcon}
-                            theme="secondary"
-                            text={`${"Start"}`}
-                            padding="rounded-sm w-full text-sm py-1 px-1.5"
-                            onClick={() => {
-                                setStartCountDown(1);
-                            }}
-                            disabled={quiz == null ? true : false}
-                        />
-                    </div>
+                    <>
+                        {pageLoadStatus && (
+                            <SpinnerComponent
+                                text="Preparing Quiz Portal for you..."
+                                customize="animate-pulse"
+                            />
+                        )}
+                        {quiz &&
+                            Number(quiz.settings?.maxAttempts) >
+                                prevAttempts.length && (
+                                <div className="space-y-4 bg-white border border-slate-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg p-3 shadow-sm">
+                                    {!movingToResults ? (
+                                        <>
+                                            <h4 className="font-semibold">
+                                                Note:
+                                            </h4>
+                                            <ul className="text-sm list-disc list-inside space-y-2">
+                                                <li>
+                                                    Quiz Will be auto-submitted
+                                                    after{" "}
+                                                    {quiz?.settings?.maxDuration?.substring(
+                                                        2,
+                                                    )}
+                                                </li>
+                                                <li>
+                                                    Keep an eye on the timer
+                                                    while you answer
+                                                </li>
+                                                <li>All the best!</li>
+                                            </ul>
+                                            <ActionButton
+                                                icon={SquaresPlusIcon}
+                                                theme="secondary"
+                                                text={`${
+                                                    startCountDown !== null &&
+                                                    startCountDown !== 0
+                                                        ? "Starting quiz..."
+                                                        : quiz &&
+                                                            prevAttempts.length !=
+                                                                0 &&
+                                                            prevAttempts.length <
+                                                                Number(
+                                                                    quiz
+                                                                        .settings
+                                                                        ?.maxAttempts,
+                                                                )
+                                                          ? interruptedAttempt !==
+                                                            null
+                                                              ? "Resume"
+                                                              : "Re-Attempt"
+                                                          : "Start"
+                                                }`}
+                                                padding="rounded-sm w-full text-sm py-1 px-1.5"
+                                                onClick={() => {
+                                                    setStartCountDown(1);
+                                                }}
+                                                disabled={
+                                                    (startCountDown !== null &&
+                                                        startCountDown !== 0) ||
+                                                    quiz === null
+                                                }
+                                            />
+                                        </>
+                                    ) : (
+                                        <div className="container text-center space-y-2 p-2">
+                                            <p className="animate-pulse">
+                                                Taking you to the results page
+                                                in {movingToResults}
+                                            </p>
+                                            <ActionButton
+                                                theme="secondary"
+                                                text="Go to Results Now"
+                                                padding="px-1.5 py-1 rounded-sm"
+                                                onClick={() => {
+                                                    if (attemptIdForRedirect) {
+                                                        navigate(
+                                                            RoutePaths.ATTEMPT_DETAILS.replace(
+                                                                ":attemptId",
+                                                                String(
+                                                                    attemptIdForRedirect,
+                                                                ),
+                                                            ),
+                                                        );
+                                                    }
+                                                }}
+                                            />
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                    </>
                 ) : (
                     <>
                         <div className="inline-flex flex-col md:flex-row justify-between w-full bg-white border border-slate-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg p-3 gap-y-3 shadow-sm">
@@ -333,7 +628,7 @@ export default function QuizAttempt() {
                                             <div className="absolute inset-0 bg-amber-100/70 z-0 animate-ping rounded-full"></div>
                                         )}
                                         <BadgeComponent
-                                            type={`${timeLeftInSeconds <= 60 ? "warning" : "info"}`}
+                                            type={`${timeLeftInSeconds <= 60 ? "danger" : "info"}`}
                                             value={
                                                 timeLeftInSeconds !== null
                                                     ? formatSecondsToDisplay(
