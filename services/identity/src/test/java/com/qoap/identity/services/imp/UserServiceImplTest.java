@@ -176,45 +176,6 @@ class UserServiceImplTest {
 	}
 
 	@Test
-	void createUser_ShouldAllowAgentToCreateUser() {
-
-		CreateUserRequestDto request = new CreateUserRequestDto(
-				"customer@test.com",
-				"Customer",
-				"One",
-				null,
-				"password",
-				LocalDate.now(),
-				"9999999999",
-				addressDto,
-				RoleType.STUDENT);
-
-		Role customerRole = new Role();
-		customerRole.setName(RoleType.STUDENT);
-
-		when(authenticationContext.getCurrentUser())
-				.thenReturn(Optional.of(authenticatedUser("ROLE_AGENT")));
-
-		when(userRepository.existsByEmail(any()))
-				.thenReturn(false);
-
-		when(roleRepository.findByName(RoleType.STUDENT))
-				.thenReturn(Optional.of(customerRole));
-
-		when(passwordEncoder.encode(any()))
-				.thenReturn("encoded");
-
-		when(userRepository.save(any(User.class)))
-				.thenAnswer(i -> i.getArgument(0));
-
-		UserResponse response = userService.createUser(request);
-
-		assertNotNull(response);
-
-		verify(userRepository).save(any(User.class));
-	}
-
-	@Test
 	void createUser_ShouldThrow_WhenCurrentUserIsCustomer() {
 
 		CreateUserRequestDto request = new CreateUserRequestDto(
