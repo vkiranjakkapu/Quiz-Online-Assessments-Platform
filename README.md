@@ -844,6 +844,48 @@ npm run dev
 
 The frontend is configured as a Vite development application.
 
+# Screenshots
+
+## Quizzes
+
+![Login](docs/images/quizzes.png)
+
+## Dashboard
+
+![Dashboard](docs/images/dashboard.png)
+
+## Quiz Details
+
+![Quiz Management](docs/images/quiz-details.png)
+
+## Begin
+
+![Quiz Management](docs/images/countDown.png)
+
+## Portal
+
+![Quiz Attempt](docs/images/portal.png)
+
+## Interrputed Quiz
+
+![Quiz Attempt](docs/images/interruptedQuiz.png)
+
+## Resume
+
+![Leaderboard](docs/images/resume.png)
+
+## Lastmin
+
+![Leaderboard](docs/images/lastMin.png)
+
+## Submission
+
+![Leaderboard](docs/images/submission.png)
+
+## Leaderboard/Results
+
+![Leaderboard](docs/images/attemptDetails.png)
+
 ---
 
 # Future Enhancements
