@@ -82,11 +82,10 @@ public class LeaderBoardServiceImp implements LeaderBoardService {
     public List<Attempt> getAllAttemptsByQuizId(UUID quizId) {
         try {
             RestResponseDto<List<Attempt>> response = restClient.get()
-                    .uri(QUIZ_SERVICE_URL + "/attempts/quiz/" + quizId)
+                    .uri(QUIZ_SERVICE_URL + "/attempts/leaderboard/" + quizId)
                     .retrieve()
                     .body(new ParameterizedTypeReference<RestResponseDto<List<Attempt>>>() {
                     });
-            System.out.println(response);
             return response != null ? response.getData() : null;
         } catch (HttpStatusCodeException e) {
             String rawJsonResponseBody = e.getResponseBodyAsString();

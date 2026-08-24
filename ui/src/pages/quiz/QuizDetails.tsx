@@ -8,6 +8,7 @@ import QuizInfoCard from "../../components/quiz/QuizInfoCard";
 import SpinnerComponent from "../../components/SpinnerComponent";
 import AttemptsPage from "../attempts/AttemptsPage";
 import type { Attempt } from "../../services/AttemptService";
+import LeaderBoard from "../leaderboard/LeaderBoard";
 
 export default function QuizDetails() {
     const { quizId } = useParams<{ quizId: string }>();
@@ -108,6 +109,12 @@ export default function QuizDetails() {
                             )}
                         </div>
                     </div>
+
+                    {quiz && (
+                        <div className="order-2 md:order-3 col-span-full rounded-lg border border-slate-200 dark:border-slate-800 dark:bg-slate-900">
+                            <LeaderBoard quiz={quiz ?? {}} />
+                        </div>
+                    )}
 
                     <div className="order-2 md:order-3 col-span-full rounded-lg border border-slate-200 dark:border-slate-800 dark:bg-slate-900">
                         <AttemptsPage

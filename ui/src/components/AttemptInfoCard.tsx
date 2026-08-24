@@ -11,8 +11,12 @@ import {
     formatDurationTaken,
     formatIsoDate,
 } from "../utils/DateTimeParseHelper";
+import { useNavigate } from "react-router-dom";
+import { RoutePaths } from "../routes/RoutePaths";
 
 export default function AttemptInfoCard({ attempt }: { attempt: Attempt }) {
+    const navigate = useNavigate();
+
     return (
         <div className="space-y-3 bg-slate-100 dark:bg-slate-900 p-4 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700">
             <div className="inline-flex justify-between items-center w-full">
@@ -29,7 +33,18 @@ export default function AttemptInfoCard({ attempt }: { attempt: Attempt }) {
                 )}
                 {(attempt.status === AttemptStatus.IN_PROGRESS ||
                     attempt.status === AttemptStatus.INTERUPTED) && (
-                    <ActionButton theme="secondary" text={"Resume Quiz"} />
+                    <ActionButton
+                        theme="secondary"
+                        text={"Resume Quiz"}
+                        onClick={() => {
+                            navigate(
+                                RoutePaths.QUIZ_ATTEMPT.replace(
+                                    ":quizId",
+                                    attempt.quiz.id + "",
+                                ),
+                            );
+                        }}
+                    />
                 )}
             </div>
             <hr className="w-full border border-slate-200 dark:border-slate-700" />

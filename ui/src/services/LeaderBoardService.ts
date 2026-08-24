@@ -3,11 +3,11 @@ import type { UserProfile } from "../context/useProfile";
 import type { Attempt } from "./AttemptService";
 
 class LeaderBoardService {
-    async getLeaderBoard<T>(quizId?: string): Promise<T | ErrorResponse> {
+    async getLeaderBoard<T>(quizId: string): Promise<T | ErrorResponse> {
         return apiClient({
             type: "get",
             service: "reports",
-            uri: quizId ? "/leaderboard/quiz/" + quizId : "/leaderboard/",
+            uri: "/leaderboard/quiz/" + quizId,
         });
     }
 }
