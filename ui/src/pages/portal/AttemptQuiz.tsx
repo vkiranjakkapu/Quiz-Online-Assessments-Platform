@@ -195,7 +195,13 @@ export default function QuizAttempt() {
             (resp) => {
                 if (resp && !("errorMessage" in resp)) {
                     setPrevAttempts(resp);
-                    if (resp.length > Number(quiz.settings?.maxAttempts)) {
+                    if (
+                        resp.filter(
+                            (a) =>
+                                a.status !== AttemptStatus.INTERUPTED &&
+                                a.status !== AttemptStatus.IN_PROGRESS,
+                        ).length >= Number(quiz.settings?.maxAttempts)
+                    ) {
                         setNotifications("attempt", {
                             type: "error",
                             messages: [
@@ -270,48 +276,60 @@ export default function QuizAttempt() {
                 return false;
             }
 
-            const emptyAnswers = (quiz.questions ?? []).map(
-                (question) =>
-                    ({
-                        questionId: Number(question.id),
-                        answerId: null,
-                    }) as QuizAnswers,
+            const existingAnswersMap = new Map<number, number>();
+            if (attempt?.answers && attempt?.answers?.length > 0) {
+                for (const a of attempt.answers) {
+                    const answers: {
+                        id: number;
+                        isCorrect: boolean;
+                        questionId: number;
+                        selectedOptionId: number;
+                    } = a as unknown as {
+                        id: number;
+                        isCorrect: boolean;
+                        questionId: number;
+                        selectedOptionId: number;
+                    };
+                    const qId = Number(answers.questionId);
+                    const aId = Number(answers.selectedOptionId);
+
+                    existingAnswersMap.set(qId, aId);
+                }
+            }
+
+            const mergedAnswers: QuizAnswers[] = (quiz.questions ?? []).map(
+                (question) => {
+                    const questionId = Number(question.id);
+                    const savedAnswerId = existingAnswersMap.get(questionId);
+
+                    return {
+                        questionId,
+                        answerId:
+                            savedAnswerId !== undefined ? savedAnswerId : null,
+                    } as QuizAnswers;
+                },
             );
 
-            const initialAttempt = attempt
-                ? ({
+            const initialAttempt: AttemptProgress = attempt
+                ? {
+                      studentId: profile?.id ?? "",
                       attemptId: attempt.id,
-                      quizId: attempt.quiz.id,
-                      answers:
-                          attempt.answers.length != 0
-                              ? [
-                                    ...emptyAnswers,
-                                    ...attempt.answers.map(
-                                        (ans) =>
-                                            ({
-                                                questionId: Number(
-                                                    ans.question.id,
-                                                ),
-                                                answerId: Number(
-                                                    ans.selectedOption.id,
-                                                ),
-                                            }) as QuizAnswers,
-                                    ),
-                                ]
-                              : emptyAnswers,
+                      quizId: attempt.quiz.id ?? quizId ?? "",
+                      answers: mergedAnswers,
                       status: AttemptStatus.IN_PROGRESS,
-                  } as AttemptProgress)
-                : ({
+                  }
+                : {
                       studentId: profile?.id ?? "",
                       quizId: quizId ?? "",
-                      answers: emptyAnswers,
+                      answers: mergedAnswers,
                       status: AttemptStatus.IN_PROGRESS,
-                  } as AttemptProgress);
+                  };
 
             saveQuizProgress({ payload: initialAttempt });
             setAttemptInProgress(true);
             setAttempt(initialAttempt);
             setSelectedQuestion((quiz.questions ?? [])[0]);
+
             // * Timer
             const totalSecs =
                 parseIsoDurationToSeconds(quiz?.settings?.maxDuration) -
@@ -520,8 +538,9 @@ export default function QuizAttempt() {
                             />
                         )}
                         {quiz &&
-                            Number(quiz.settings?.maxAttempts) >
-                                prevAttempts.length && (
+                            (interruptedAttempt !== null ||
+                                Number(quiz.settings?.maxAttempts) >
+                                    prevAttempts.length) && (
                                 <div className="space-y-4 bg-white border border-slate-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg p-3 shadow-sm">
                                     {!movingToResults ? (
                                         <>
@@ -549,15 +568,17 @@ export default function QuizAttempt() {
                                                     startCountDown !== null &&
                                                     startCountDown !== 0
                                                         ? "Starting quiz..."
-                                                        : quiz &&
-                                                            prevAttempts.length !=
+                                                        : (quiz &&
+                                                                interruptedAttempt !==
+                                                                    null) ||
+                                                            (prevAttempts.length !=
                                                                 0 &&
-                                                            prevAttempts.length <
-                                                                Number(
-                                                                    quiz
-                                                                        .settings
-                                                                        ?.maxAttempts,
-                                                                )
+                                                                prevAttempts.length <
+                                                                    Number(
+                                                                        quiz
+                                                                            .settings
+                                                                            ?.maxAttempts,
+                                                                    ))
                                                           ? interruptedAttempt !==
                                                             null
                                                               ? "Resume"
@@ -566,7 +587,7 @@ export default function QuizAttempt() {
                                                 }`}
                                                 padding="rounded-sm w-full text-sm py-1 px-1.5"
                                                 onClick={() => {
-                                                    setStartCountDown(1);
+                                                    setStartCountDown(5);
                                                 }}
                                                 disabled={
                                                     (startCountDown !== null &&
@@ -671,7 +692,7 @@ export default function QuizAttempt() {
 
                                         return (
                                             <ActionButton
-                                                key={ques.questionId || idx}
+                                                key={`Q${idx + 1}`}
                                                 text={`Q${idx + 1}`}
                                                 resetStyles={style}
                                                 padding="p-2 md:p-1"

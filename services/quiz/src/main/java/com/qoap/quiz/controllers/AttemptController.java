@@ -35,7 +35,19 @@ public class AttemptController {
 
     @GetMapping("/")
     public ResponseEntity<APIResponseDto> getAllAttempts() {
-        List<Attempt> allAttempts = attemptsService.getAllAttempts();
+        List<Attempt> allAttempts = currentUser.isStudent()
+                ? attemptsService.getAllAttemptsByStudent(currentUser.userId())
+                : attemptsService.getAllAttempts();
+
+        return ResponseEntity.ok(APIResponseDto.builder().data(
+                currentUser.isAdmin() ? allAttempts
+                        : allAttempts.stream().map(attempt -> attemptsService.mapAttemptToStudentResponse(attempt)))
+                .build());
+    }
+
+    @GetMapping("/leaderboard/{quizId}")
+    public ResponseEntity<APIResponseDto> getLeaderboardByQuizId(@PathVariable UUID quizId) {
+        List<Attempt> allAttempts = attemptsService.getAllAttemptsByQuizId(quizId);
         return ResponseEntity.ok(APIResponseDto.builder().data(
                 currentUser.isAdmin() ? allAttempts
                         : allAttempts.stream().map(attempt -> attemptsService.mapAttemptToStudentResponse(attempt)))
@@ -64,7 +76,9 @@ public class AttemptController {
 
     @GetMapping("/quiz/{quizId}")
     public ResponseEntity<APIResponseDto> getAllAttemptsByQuizId(@PathVariable UUID quizId) {
-        List<Attempt> allAttempts = attemptsService.getAllAttemptsByQuizId(quizId);
+        List<Attempt> allAttempts = currentUser.isAdmin() ? attemptsService.getAllAttemptsByQuizId(quizId)
+                : attemptsService.getAllAttemptsByStudent(currentUser.userId()).stream()
+                        .filter(a -> a.getQuiz().getId().equals(quizId)).toList();
         return ResponseEntity.ok(APIResponseDto.builder()
                 .data(currentUser.isAdmin() ? allAttempts
                         : allAttempts.stream().map(att -> attemptsService.mapAttemptToStudentResponse(att)).toList())

@@ -115,12 +115,14 @@ public class AttemptsServiceImp implements AttemptsService {
         updateAnswers(request, attempt);
 
         // ? Updating timespent
-        Duration timeSpent = Duration.between(attempt.getAttemptTime(), LocalDateTime.now());
+        Duration timeSpent = Optional.ofNullable(attempt.getTimeSpent()).isPresent()
+                ? attempt.getTimeSpent().plus(Duration.ofSeconds(5))
+                : Duration.ofSeconds(0);
         attempt.setTimeSpent(timeSpent);
 
         Quiz quiz = attempt.getQuiz();
         Duration maxDuration = quiz.getSettings().getMaxDuration();
-        if (maxDuration != null && (maxDuration.minus(timeSpent).isNegative() || maxDuration.equals(timeSpent))) {
+        if (maxDuration.minus(timeSpent).isNegative() || maxDuration.equals(timeSpent)) {
             attempt.setStatus(AttemptStatus.AUTO_COMPLETED);
         } else {
             attempt.setStatus(request.status());

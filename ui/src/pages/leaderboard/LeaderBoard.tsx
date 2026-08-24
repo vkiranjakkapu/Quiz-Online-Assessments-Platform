@@ -7,11 +7,11 @@ import LeaderBoardService, {
     type LeaderBoardData,
 } from "../../services/LeaderBoardService";
 
-export default function LeaderBoard({ quiz }: { quiz?: Quiz }) {
+export default function LeaderBoard({ quiz }: { quiz: Quiz }) {
     const [leaderBoard, setLeaderBoard] = useState<LeaderBoardData[]>([]);
 
     useEffect(() => {
-        LeaderBoardService.getLeaderBoard<LeaderBoardData[]>(quiz?.id).then(
+        LeaderBoardService.getLeaderBoard<LeaderBoardData[]>(quiz.id + "").then(
             (resp) => {
                 if (resp && !("errorMessage" in resp)) {
                     setLeaderBoard(resp);

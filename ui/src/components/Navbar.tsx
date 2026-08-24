@@ -6,22 +6,21 @@ import {
     HomeIcon,
     ListBulletIcon,
     MoonIcon,
-    SparklesIcon,
     Square2StackIcon,
     SunIcon,
     UserCircleIcon,
     UsersIcon,
-    XMarkIcon,
+    XMarkIcon
 } from "@heroicons/react/24/outline";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import FemaleProfile from "../assets/undraw_a-woman-avatar_ifsl.svg";
+import MaleProfile from "../assets/undraw_cool-guy-avatar_qjc4.svg";
 import usePrincipal from "../context/usePrincipal";
+import useProfile, { UserGender } from "../context/useProfile";
 import { RoutePaths } from "../routes/RoutePaths";
 import ActionButton from "./button/ActionButton";
 import Logo from "/logo.png";
-import FemaleProfile from "../assets/undraw_a-woman-avatar_ifsl.svg";
-import MaleProfile from "../assets/undraw_cool-guy-avatar_qjc4.svg";
-import useProfile, { UserGender } from "../context/useProfile";
 
 export type NavbarProps = {
     handleLoginClick?: () => void;
@@ -79,12 +78,6 @@ export default function Navbar({
             icon: Square2StackIcon,
             path: RoutePaths.ATTEMPTS,
             roles: ["ADMIN"],
-        },
-        {
-            text: "Leaderboard",
-            icon: SparklesIcon,
-            path: RoutePaths.LEADERBOARD,
-            roles: ["STUDENT"],
         },
         {
             text: "Users",

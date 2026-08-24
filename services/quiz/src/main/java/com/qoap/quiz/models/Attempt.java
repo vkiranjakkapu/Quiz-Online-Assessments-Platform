@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import com.qoap.quiz.enums.AttemptStatus;
 
@@ -68,6 +69,9 @@ public class Attempt {
     @Enumerated(EnumType.STRING)
     @Builder.Default
     private AttemptStatus status = AttemptStatus.IN_PROGRESS;
+
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
 
     @CreationTimestamp
     private LocalDateTime attemptTime;
