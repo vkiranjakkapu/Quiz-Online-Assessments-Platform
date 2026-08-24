@@ -34,6 +34,7 @@ import com.labmantix.platform.security.model.AuthenticatedUser;
 import com.labmantix.platform.security.model.DefaultAuthenticatedUser;
 import com.qoap.identity.dto.AddressDto;
 import com.qoap.identity.dto.CreateUserRequestDto;
+import com.qoap.identity.dto.FetchUsersRequestDto;
 import com.qoap.identity.dto.UpdateUserRequest;
 import com.qoap.identity.dto.UserResponse;
 import com.qoap.identity.entities.RoleType;
@@ -121,11 +122,12 @@ class UserControllerTest {
 
 	@Test
 	void updateUser_ShouldReturn200() throws Exception {
+		UUID id = UUID.fromString("c0186249-9fc1-4927-97b3-a08a21febfe3");
 
-		when(userService.updateUser(eq(UUID.fromString("c0186249-9fc1-4927-97b3-a08a21febfe3")), any()))
+		when(userService.updateUser(eq(id), any(UpdateUserRequest.class)))
 				.thenReturn(response());
 
-		mockMvc.perform(put("/identity/api/v1/users/" + UUID.fromString("c0186249-9fc1-4927-97b3-a08a21febfe3"))
+		mockMvc.perform(put("/identity/api/v1/users/" + id)
 				.with(adminJwt())
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(jsonMapper.writeValueAsString(updateRequest())))
@@ -165,8 +167,9 @@ class UserControllerTest {
 
 	@Test
 	void getAllUsersWithIds_ShouldReturn200() throws Exception {
-
 		UUID id = UUID.fromString("c0186249-9fc1-4927-97b3-a08a21febfe3");
+
+		FetchUsersRequestDto request = new FetchUsersRequestDto(List.of(id));
 
 		when(userService.getAllUsersWithIds(List.of(id)))
 				.thenReturn(List.of(response()));
@@ -174,7 +177,7 @@ class UserControllerTest {
 		mockMvc.perform(post("/identity/api/v1/users/search")
 				.with(adminJwt())
 				.contentType(MediaType.APPLICATION_JSON)
-				.content(jsonMapper.writeValueAsString(List.of(id))))
+				.content(jsonMapper.writeValueAsString(request)))
 				.andExpect(status().isOk());
 	}
 
@@ -217,13 +220,12 @@ class UserControllerTest {
 	}
 
 	private UpdateUserRequest updateRequest() {
-
 		return new UpdateUserRequest(
 				"John",
 				"Doe",
 				"8888888888",
 				UserGender.NON_DISCLOSED,
-				null,
+				LocalDate.of(2001, 3, 1),
 				AddressDto.builder()
 						.street("New Street")
 						.pinCode("534237")

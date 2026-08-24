@@ -99,10 +99,7 @@ export default function QuizDetails() {
                                 <QuizInfoCard
                                     key={attempts.length + "" + quiz?.id}
                                     quiz={quiz ?? {}}
-                                    showAttempt={
-                                        attempts.length <
-                                        Number(quiz?.settings?.maxAttempts)
-                                    }
+                                    showAttempt={true}
                                     attemptsLeft={
                                         Number(quiz?.settings?.maxAttempts) -
                                         attempts.length

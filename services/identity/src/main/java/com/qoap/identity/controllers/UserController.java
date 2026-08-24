@@ -97,7 +97,7 @@ public class UserController {
 
     @Operation(summary = "Get all users with ids")
     @PostMapping("/search")
-    @PreAuthorize("hasAnyRole('ADMIN','AGENT','CUSTOMER')")
+    @PreAuthorize("hasAnyRole('ADMIN','STUDENT')")
     public ResponseEntity<APIResponseDto> getAllUsersWithIds(@RequestBody FetchUsersRequestDto request) {
         return ResponseEntity
                 .ok(APIResponseDto.builder().data(userService.getAllUsersWithIds(request.ids())).build());

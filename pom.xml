@@ -28,8 +28,8 @@
     </properties>
 
     <modules>
-        <module>cloud</module>
         <module>platform</module>
+        <module>cloud</module>
         <module>services</module>
     </modules>
 
